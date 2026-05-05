@@ -4,12 +4,14 @@ FastAPI backend · POST /api/report
 """
 
 import math
+import os
 
 import anthropic
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from supabase import create_client, Client
 
 app = FastAPI(title="InMind API")
 
@@ -26,6 +28,10 @@ app.add_middleware(
 )
 
 client = anthropic.Anthropic()
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://wnkpndbkzunkjqkcsmae.supabase.co")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_KOs4bePZ_UJbmoChdG904Q_KlBYvgOe")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ── Request body ──────────────────────────────────────────────────────────────
 
@@ -216,7 +222,7 @@ async def generate_report(answers: NarrativeAnswers):
         balance = compute_balance(scores_dict)
         percentile = compute_percentile(total)
 
-        return {
+        response_data = {
             "scores": scores_dict,
             "individual_analysis": result.individual_analysis.model_dump(),
             "total_score": total,
@@ -226,6 +232,29 @@ async def generate_report(answers: NarrativeAnswers):
             "balance": balance,
             "percentile": percentile,
         }
+
+        # Save to Supabase
+        supabase_record = {
+            "user_responses": answers.model_dump(),
+            "score_p": scores_dict.get("P", 0),
+            "score_e": scores_dict.get("E", 0),
+            "score_r": scores_dict.get("R", 0),
+            "score_m": scores_dict.get("M", 0),
+            "score_a": scores_dict.get("A", 0),
+            "total_score": total,
+            "cid_type": body_type,
+            "balance_status": balance.get("level", ""),
+            "full_report": response_data
+        }
+
+        try:
+            db_res = supabase.table("reports").insert(supabase_record).execute()
+            if len(db_res.data) > 0:
+                response_data["id"] = db_res.data[0].get("id")
+        except Exception as db_err:
+            print(f"Supabase insert failed: {db_err}")
+
+        return response_data
 
     except anthropic.AuthenticationError:
         return JSONResponse(
