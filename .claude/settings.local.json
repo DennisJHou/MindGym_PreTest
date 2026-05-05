@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pkill -f \"python app.py\")",
+      "Bash(pkill -f \"uvicorn\")",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Read(//tmp/**)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(pkill -f \"uvicorn\\\\|python app\")",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)",
+      "Bash(pkill -f \"uvicorn|python app\")",
+      "Bash(python app.py)",
+      "Bash(curl -s http://localhost:8000/api/report -X POST -H 'Content-Type: application/json' -d '{\"P\":\"\",\"E\":\"\",\"R\":\"\",\"M\":\"\",\"A\":\"\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s http://localhost:8000/api/report -X POST -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(xargs kill *)"
+    ]
+  }
+}
