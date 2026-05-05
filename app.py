@@ -18,7 +18,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:5176",
-        "https://mind-gym-pre-test.vercel.app/"
+        "https://mind-gym-pre-test.vercel.app",
+        "https://mindgym-pretest.vercel.app"
     ],
     allow_methods=["*"],
     allow_headers=["*"],
