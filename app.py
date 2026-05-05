@@ -15,7 +15,11 @@ app = FastAPI(title="InMind API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5176",
+        "https://mind-gym-pre-test.vercel.app/"
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
