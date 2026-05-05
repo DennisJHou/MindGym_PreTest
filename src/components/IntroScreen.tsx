@@ -12,7 +12,7 @@ export default function LandingPage({ onStart }: Props) {
         <div className="text-5xl mb-2">🧠</div>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">
           InMind
-          <span className="mx-3 text-slate-300 font-light">────</span>
+          <br />
           心理健康的 InBody
         </h1>
         <p className="text-indigo-500 text-sm font-medium tracking-wide">
