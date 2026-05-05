@@ -189,7 +189,7 @@ async def generate_report(answers: NarrativeAnswers):
 
     try:
         response = client.messages.parse(
-            model="claude-opus-4-5",
+            model="claude-sonnet-4-5",
             max_tokens=3000,
             temperature=0.2,
             system=SYSTEM_PROMPT,
@@ -239,7 +239,8 @@ async def generate_report(answers: NarrativeAnswers):
         )
 
 # ── Entry point ───────────────────────────────────────────────────────────────
-
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
+    # 讀取 Render 分配的 PORT，找不到則預設 8000
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("app:app", host="0.0.0.0", port=port)

@@ -67,7 +67,8 @@ export default function App() {
     setApiError('')
 
     try {
-      const res = await fetch('/api/report', {
+      const baseUrl = import.meta.env.VITE_API_URL || ''
+      const res = await fetch(`${baseUrl}/api/report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalAnswers),
