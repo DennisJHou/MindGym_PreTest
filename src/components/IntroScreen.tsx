@@ -20,17 +20,39 @@ export default function LandingPage({ onStart }: Props) {
         </p>
       </div>
 
-      {/* Marketing copy */}
-      <div className="w-full rounded-2xl bg-white border border-blue-100 shadow-sm p-6 space-y-3">
-        <p className="text-slate-600 text-sm leading-relaxed">
-          身體的組成有虛胖和精壯，<strong className="text-slate-800">心理幸福感也一樣！</strong>
-        </p>
-        <p className="text-slate-600 text-sm leading-relaxed">
-          讀懂心理 InBody，才能更加靠近你自己！
-        </p>
-        <p className="text-indigo-500 text-sm font-medium">
-          用三分鐘，測量你的內在幸福力～
-        </p>
+      {/* What you'll get */}
+      <div className="w-full rounded-2xl bg-indigo-50 border border-indigo-200 shadow-sm p-6 space-y-4">
+        <p className="text-indigo-900 text-sm font-semibold text-center">測驗完成後，你會獲得：</p>
+        <div className="space-y-2">
+          <div className="flex items-start gap-3">
+            <span className="text-lg leading-none mt-0.5">🧬</span>
+            <div className="flex-1">
+              <p className="text-slate-800 text-xs font-medium">幸福體質分析</p>
+              <p className="text-slate-600 text-xs">了解自己的心理體型與幸福特質</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-lg leading-none mt-0.5">⭐</span>
+            <div className="flex-1">
+              <p className="text-slate-800 text-xs font-medium">明星配對</p>
+              <p className="text-slate-600 text-xs">發現與你最相似的名人是誰</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-lg leading-none mt-0.5">📊</span>
+            <div className="flex-1">
+              <p className="text-slate-800 text-xs font-medium">五大指數排名</p>
+              <p className="text-slate-600 text-xs">看見你的強項與需要加強的面向</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-lg leading-none mt-0.5">💡</span>
+            <div className="flex-1">
+              <p className="text-slate-800 text-xs font-medium">個性化建議</p>
+              <p className="text-slate-600 text-xs">得到專為你量身訂做的提升方案</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* PERMA dimension cards */}

@@ -138,6 +138,26 @@ export interface PercentileInfo {
   youth: number
 }
 
+export interface CelebMatch {
+  name: string
+  description: string
+  reason: string
+}
+
+export interface ConstitutionAdvice {
+  weak_dim: string
+  short_term_plan: string
+  long_term_plan: string
+  daily_practice: string
+}
+
+export interface AdvancedAnalysis {
+  complementary_dim: string
+  synergy_explanation: string
+  next_step_action: string
+  partnership_profile: string
+}
+
 export interface InMindReport {
   scores: PermaScores
   individual_analysis: Record<DimensionKey, DimensionAnalysis>
@@ -147,6 +167,9 @@ export interface InMindReport {
   body_type_context: string
   balance: BalanceInfo
   percentile: PercentileInfo
+  celeb_match: CelebMatch
+  constitution_advice: ConstitutionAdvice
+  advanced_analysis: AdvancedAnalysis
 }
 
 // ── App State ─────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { InMindReport } from '../types'
+import type { InMindReport, DimensionKey } from '../types'
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
 
 interface Props {
@@ -182,12 +182,14 @@ const BALANCE_LABEL = {
 // ── Main report component ─────────────────────────────────────────────────────
 
 export default function InMindReportPage({ report, onRestart }: Props) {
-  const { scores, individual_analysis, total_score, body_type, body_type_label, body_type_context, balance, percentile } = report
+  const { scores, individual_analysis, total_score, body_type, body_type_label, body_type_context, balance, percentile, celeb_match, constitution_advice, advanced_analysis } = report
   const bodyMeta = BODY_TYPE_META[body_type]
   const maxKey = balance.max_dim
   const minKey = balance.min_dim
   const maxCfg = DIMENSION_CONFIGS[maxKey]
   const minCfg = DIMENSION_CONFIGS[minKey]
+  const weakCfg = DIMENSION_CONFIGS[constitution_advice.weak_dim as DimensionKey] ?? DIMENSION_CONFIGS[minKey]
+  const complementaryCfg = DIMENSION_CONFIGS[advanced_analysis.complementary_dim as DimensionKey] ?? DIMENSION_CONFIGS[maxKey]
 
   return (
     <div className="results-animate w-full max-w-lg flex flex-col gap-5 pb-10">
@@ -249,6 +251,83 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         <p className="text-slate-600 text-sm leading-relaxed">{body_type_context}</p>
         <div className={`font-mono text-lg tracking-widest ${bodyMeta.color} opacity-50`}>
           {bodyMeta.bar}
+        </div>
+      </div>
+
+      {/* ── Celebrity Match ── */}
+      <div className="rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 shadow-sm p-5 space-y-3">
+        <p className="text-xs uppercase tracking-widest text-slate-400">⭐ 與你最相似的名人</p>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🎬</span>
+            <div className="flex-1">
+              <p className="text-lg font-bold text-slate-800">{celeb_match.name}</p>
+              <p className="text-slate-500 text-sm">{celeb_match.description}</p>
+            </div>
+          </div>
+          <div className="rounded-lg bg-white/60 border border-purple-100 p-3">
+            <p className="text-slate-600 text-sm leading-relaxed">{celeb_match.reason}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Constitution Advice ── */}
+      <div className={`rounded-2xl border ${weakCfg.borderLight} ${weakCfg.bgLight} p-5 space-y-4`}>
+        <div className="space-y-2 border-b border-current border-opacity-20 pb-3">
+          <p className="text-xs uppercase tracking-widest text-slate-400">💪 體質分析與建議</p>
+          <p className="text-sm text-slate-600">
+            你的<span className={`font-semibold ${weakCfg.textColor}`}>{weakCfg.label}</span>是目前最需要加強的面向
+          </p>
+        </div>
+        <div className="space-y-3">
+          <div className="rounded-lg bg-white/60 p-3 space-y-1">
+            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">📅 短期計畫（2-4週）</p>
+            <p className="text-slate-700 text-sm leading-relaxed">{constitution_advice.short_term_plan}</p>
+          </div>
+          <div className="rounded-lg bg-white/60 p-3 space-y-1">
+            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">🎯 長期鍛鍊（3個月+）</p>
+            <p className="text-slate-700 text-sm leading-relaxed">{constitution_advice.long_term_plan}</p>
+          </div>
+          <div className="rounded-lg bg-white/60 p-3 space-y-1">
+            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">⚡ 每日練習</p>
+            <p className="text-slate-700 text-sm leading-relaxed">{constitution_advice.daily_practice}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Advanced Analysis & Partnership ── */}
+      <div className="rounded-2xl bg-white border border-blue-100 shadow-sm p-5 space-y-4">
+        <p className="text-xs uppercase tracking-widest text-slate-400">🔗 進階分析與互補建議</p>
+
+        <div className="rounded-lg bg-slate-50 p-4 space-y-2 border border-slate-200">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 text-center">
+              <p className="text-2xl">{weakCfg.icon}</p>
+              <p className="text-xs text-slate-600 mt-1">{weakCfg.label}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-2xl">+</div>
+            </div>
+            <div className="flex-1 text-center">
+              <p className="text-2xl">{complementaryCfg.icon}</p>
+              <p className="text-xs text-slate-600 mt-1">{complementaryCfg.label}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">互補原理</p>
+            <p className="text-slate-600 text-sm leading-relaxed">{advanced_analysis.synergy_explanation}</p>
+          </div>
+          <div className="rounded-lg bg-indigo-50 border border-indigo-100 p-3 space-y-1">
+            <p className="text-indigo-900 text-xs font-semibold uppercase tracking-wide">下一步行動</p>
+            <p className="text-indigo-700 text-sm leading-relaxed">{advanced_analysis.next_step_action}</p>
+          </div>
+          <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 space-y-1">
+            <p className="text-emerald-900 text-xs font-semibold uppercase tracking-wide">🤝 理想搭配特質</p>
+            <p className="text-emerald-700 text-sm leading-relaxed">{advanced_analysis.partnership_profile}</p>
+          </div>
         </div>
       </div>
 

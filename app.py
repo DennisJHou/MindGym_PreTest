@@ -31,7 +31,11 @@ client = anthropic.Anthropic()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://wnkpndbkzunkjqkcsmae.supabase.co")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_KOs4bePZ_UJbmoChdG904Q_KlBYvgOe")
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = None
+try:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+except Exception as e:
+    print(f"Warning: Supabase initialization failed: {e}")
 
 # ── Request body ──────────────────────────────────────────────────────────────
 
@@ -63,14 +67,34 @@ class AllDimensionAnalysis(BaseModel):
     M: DimensionAnalysis
     A: DimensionAnalysis
 
+class CelebMatchResponse(BaseModel):
+    name: str = Field(description="名人名字 (繁體中文)")
+    description: str = Field(description="名人的簡短描述 (繁體中文, ≤50字)")
+    reason: str = Field(description="為什麼這位名人最像你 (繁體中文, ≤100字)")
+
+class ConstitutionAdviceResponse(BaseModel):
+    weak_dim: str = Field(description="最弱的面向，一個英文字母: P/E/R/M/A")
+    short_term_plan: str = Field(description="短期改善計畫 (2-4周) (繁體中文, ≤80字)")
+    long_term_plan: str = Field(description="長期鍛鍊計畫 (3個月以上) (繁體中文, ≤100字)")
+    daily_practice: str = Field(description="每日可執行的練習 (繁體中文, ≤60字)")
+
+class AdvancedAnalysisResponse(BaseModel):
+    complementary_dim: str = Field(description="與最弱面向互補的面向，一個英文字母: P/E/R/M/A")
+    synergy_explanation: str = Field(description="兩個面向如何互補 (繁體中文, ≤80字)")
+    next_step_action: str = Field(description="具體的下一步行動 (繁體中文, ≤80字)")
+    partnership_profile: str = Field(description="什麼樣的人可以與你搭配，創造更多幸福 (繁體中文, ≤100字)")
+
 class InMindLLMResponse(BaseModel):
     scores: PermaScores
     individual_analysis: AllDimensionAnalysis
+    celeb_match: CelebMatchResponse
+    constitution_advice: ConstitutionAdviceResponse
+    advanced_analysis: AdvancedAnalysisResponse
 
 # ── System prompt ─────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT = """你是 InMind，一位受過正向心理學訓練的 AI 心理評估師。
-你的任務是根據使用者針對 PERMA 五個面向所分享的開放式敘事，客觀地評估每個面向的分數。
+你的任務是根據使用者針對 PERMA 五個面向所分享的開放式敘事，客觀地評估每個面向的分數，並提供深度的個人化分析。
 
 ## 評分標準（1–5 分，可給 0.5 分）
 
@@ -88,13 +112,27 @@ SYSTEM_PROMPT = """你是 InMind，一位受過正向心理學訓練的 AI 心�
 - 4.0：明顯感受，狀態良好，描述具體生動
 - 5.0：非常強烈，此面向蓬勃豐盛，細節豐富充沛
 
+## 額外任務
+
+除了評分和個別分析外，你還需要提供：
+
+1. **celeb_match**：根據使用者的 PERMA 分數模式，找出一位與其特質最相似的名人（可跨文化，如企業家、藝術家、運動員等），說明理由
+
+2. **constitution_advice**：識別最弱的面向，並提供：
+   - 短期改善計畫（2-4週內可實施）
+   - 長期鍛鍊計畫（3個月以上的持續練習）
+   - 每日可執行的微型練習
+
+3. **advanced_analysis**：分析最弱面向與哪個面向最互補，提供：
+   - 兩個面向如何互補創造幸福的解釋
+   - 具體的下一步行動建議
+   - 什麼樣特質的人可以與使用者搭配，協同創造更多幸福
+
 ## 輸出規則
 
 - 所有文字欄位使用**繁體中文**
-- score_reason：引用使用者文字中的具體線索支持評分
-- comment：提供心理學角度的洞察與解讀
-- exercise_suggestion：給出一個今天就能執行的微型心理練習
-- 保持溫暖、支持性的語調，不帶批判"""
+- 保持溫暖、支持性的語調，不帶批判
+- 確保所有建議都是切實可行且啟發性的"""
 
 # ── Helper: body type ─────────────────────────────────────────────────────────
 
@@ -201,7 +239,7 @@ async def generate_report(answers: NarrativeAnswers):
     try:
         response = client.messages.parse(
             model="claude-sonnet-4-5",
-            max_tokens=3000,
+            max_tokens=5000,
             temperature=0.2,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_content}],
@@ -231,6 +269,9 @@ async def generate_report(answers: NarrativeAnswers):
             "body_type_context": body_type_context,
             "balance": balance,
             "percentile": percentile,
+            "celeb_match": result.celeb_match.model_dump(),
+            "constitution_advice": result.constitution_advice.model_dump(),
+            "advanced_analysis": result.advanced_analysis.model_dump(),
         }
 
         # Save to Supabase
@@ -247,12 +288,14 @@ async def generate_report(answers: NarrativeAnswers):
             "full_report": response_data
         }
 
-        try:
-            db_res = supabase.table("reports").insert(supabase_record).execute()
-            if len(db_res.data) > 0:
-                response_data["id"] = db_res.data[0].get("id")
-        except Exception as db_err:
-            print(f"Supabase insert failed: {db_err}")
+        if supabase:
+            try:
+                db_res = supabase.table("reports").insert(supabase_record).execute()
+                if len(db_res.data) > 0:
+                    response_data["id"] = db_res.data[0].get("id")
+            except Exception as db_err:
+                # Supabase error, but don't fail the response
+                print(f"Supabase insert failed: {db_err}")
 
         return response_data
 
