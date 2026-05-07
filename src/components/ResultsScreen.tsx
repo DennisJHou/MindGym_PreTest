@@ -240,8 +240,8 @@ export default function InMindReportPage({ report, onRestart }: Props) {
           </div>
           <div className="flex flex-col items-center gap-1 px-1">
             <span className="text-slate-300 text-xl">↕</span>
-            <span className="font-mono font-bold text-slate-700 text-sm">Δ {balance.delta.toFixed(1)}</span>
-            <span className="text-slate-400 text-xs">差距</span>
+            <span className="font-bold text-slate-700 text-sm">{balance.delta.toFixed(1)}</span>
+            <span className="text-slate-400 text-xs">差異</span>
           </div>
           <div className={`flex-1 rounded-xl ${minCfg.bgLight} border ${minCfg.borderLight} p-3 text-center space-y-1`}>
             <p className="text-slate-400 text-xs">最低指數</p>
