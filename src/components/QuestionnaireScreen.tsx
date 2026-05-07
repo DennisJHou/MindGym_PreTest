@@ -14,6 +14,7 @@ const MIN_CHARS = 30
 export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, onSubmit }: Props) {
   const [step, setStep] = useState(startAtLast ? DIMENSION_ORDER.length - 1 : 0)
   const [answers, setAnswers] = useState<NarrativeAnswers>(initialAnswers)
+  const [showHints, setShowHints] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const key = DIMENSION_ORDER[step]
@@ -26,6 +27,7 @@ export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, o
 
   useEffect(() => {
     textareaRef.current?.focus()
+    setShowHints(false)
   }, [step])
 
   function handleChange(val: string) {
@@ -85,9 +87,9 @@ export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, o
       {/* Question card */}
       <div
         key={step}
-        className={`question-animate rounded-2xl border ${cfg.borderLight} ${cfg.bgLight} p-5 space-y-1`}
+        className={`question-animate rounded-2xl border ${cfg.borderLight} ${cfg.bgLight} p-5 space-y-3`}
       >
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2">
           <span className="text-2xl">{cfg.icon}</span>
           <div>
             <span className={`text-xs font-bold uppercase tracking-widest ${cfg.textColor}`}>
@@ -97,9 +99,38 @@ export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, o
             <span className="text-slate-500 text-xs">{cfg.label}</span>
           </div>
         </div>
+
         <p className="text-base font-medium leading-relaxed text-slate-700">
           {cfg.question}
         </p>
+
+        {/* Hints toggle */}
+        <button
+          type="button"
+          onClick={() => setShowHints((v) => !v)}
+          className={`
+            flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200
+            ${showHints
+              ? `${cfg.bgMed} ${cfg.textColor} border ${cfg.borderLight}`
+              : `bg-white/70 text-slate-500 border border-slate-200 hover:${cfg.bgLight} hover:${cfg.textColor}`
+            }
+          `}
+        >
+          <span>{showHints ? '▾' : '▸'}</span>
+          引導提示
+        </button>
+
+        {/* Hints list */}
+        {showHints && (
+          <div className="space-y-2 pt-1">
+            {cfg.hints.map((hint, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <span className={`text-xs font-bold mt-0.5 shrink-0 ${cfg.textColor}`}>{i + 1}.</span>
+                <p className="text-slate-600 text-sm leading-relaxed">{hint}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Textarea */}

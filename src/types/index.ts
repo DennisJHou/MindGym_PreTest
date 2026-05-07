@@ -9,15 +9,16 @@ export const DIMENSION_ORDER: DimensionKey[] = ['P', 'E', 'R', 'M', 'A']
 export interface DimensionConfig {
   key: DimensionKey
   icon: string
-  label: string        // e.g. '情緒存款'
-  sublabel: string     // e.g. 'Positive Emotion'
-  question: string     // Full narrative question
+  label: string
+  sublabel: string
+  question: string
+  hints: string[]      // Sub-questions revealed on demand
   textColor: string
   bgLight: string
   bgMed: string
   borderLight: string
   borderSolid: string
-  gradientBar: string  // e.g. 'from-amber-500 to-amber-300'
+  gradientBar: string
   ring: string
 }
 
@@ -28,8 +29,12 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '☀️',
     label: '情緒力',
     sublabel: 'Positive Emotion',
-    question:
-      '你還記得上一次開心是什麼時候嗎？請分享你上一次發自內心感到愉悅的經驗，越詳細越好～',
+    question: '請分享你上一次發自內心感到愉悅的經驗。',
+    hints: [
+      '那個時刻具體發生了什麼事？',
+      '當時你的身體或心理感覺到了什麼？（例如：放鬆、輕盈、心跳加速）',
+      '這個愉悅感對你當天後續的狀態有什麼影響？',
+    ],
     textColor: 'text-amber-600',
     bgLight: 'bg-amber-500/10',
     bgMed: 'bg-amber-500/20',
@@ -43,8 +48,12 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '🌊',
     label: '投入力',
     sublabel: 'Engagement',
-    question:
-      '你曾經全神貫注的做一件事嗎？這件事情你經常做嗎？請分享你做這件事的經驗與感受～',
+    question: '請分享你最近一次全神貫注做一件事的感受。',
+    hints: [
+      '當時你在處理什麼任務？是什麼讓你如此入迷？',
+      '在那個過程中，你有感覺到時間流逝的快慢嗎？',
+      '結束任務後，你感到的是精神飽滿還是疲憊？',
+    ],
     textColor: 'text-cyan-600',
     bgLight: 'bg-cyan-500/10',
     bgMed: 'bg-cyan-500/20',
@@ -58,8 +67,12 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '🧲',
     label: '連結力',
     sublabel: 'Relationships',
-    question:
-      '在你的生活中，有哪些人會在你需要時支持你？哪些人會讓你感覺他/她是愛你的？請分享他們愛你的方式或最讓你印象深刻的故事？',
+    question: '在你生活當中，哪些人會在你需要的時候支持你？',
+    hints: [
+      '他們通常是以什麼方式提供支持？（例如：傾聽、給予建議、或實質幫忙）',
+      '你上一次向他們尋求支持或分享脆弱是什麼時候？',
+      '想到這些人的存在，會讓你現在的心境有什麼變化？',
+    ],
     textColor: 'text-rose-600',
     bgLight: 'bg-rose-500/10',
     bgMed: 'bg-rose-500/20',
@@ -73,8 +86,12 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '🏔',
     label: '意義力',
     sublabel: 'Meaning',
-    question:
-      '你覺得你的生活是有目的、有意義的嗎？你通常都怎樣完成、實現你的生活的目的或意義？',
+    question: '你覺得你生活的目的和意義是什麼？',
+    hints: [
+      '在日常生活中，哪些時刻會讓你覺得「這一切都是值得的」？',
+      '你最重視的價值觀是什麼？它如何體現在你的行動中？',
+      '如果你可以為這世界留下一點改變，那會是什麼？',
+    ],
     textColor: 'text-violet-600',
     bgLight: 'bg-violet-500/10',
     bgMed: 'bg-violet-500/20',
@@ -88,8 +105,12 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '⚡',
     label: '成就力',
     sublabel: 'Accomplishment',
-    question:
-      '在過去三個月，哪些事件讓你感覺你離你的目標越來越近，或是越來越遠？',
+    question: '在過去三個月，你覺得你是離你的目標越來越近，還是越來越遠？',
+    hints: [
+      '是什麼關鍵事件讓你產生「靠近」或「遠離」的感覺？',
+      '在追求目標的過程中，你發現自己最具優勢的特質是什麼？',
+      '無論遠近，你覺得下一個階段你可以跨出的小小一步是什麼？',
+    ],
     textColor: 'text-emerald-600',
     bgLight: 'bg-emerald-500/10',
     bgMed: 'bg-emerald-500/20',

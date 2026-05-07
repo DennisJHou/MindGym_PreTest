@@ -22,6 +22,10 @@ export default {
     'bg-amber-500', 'bg-cyan-500', 'bg-rose-500', 'bg-violet-500', 'bg-emerald-500',
     // Ring colours
     'ring-amber-500/50', 'ring-cyan-500/50', 'ring-rose-500/50', 'ring-violet-500/50', 'ring-emerald-500/50',
+    // Hover variants for dynamic classes
+    'hover:bg-amber-500/10', 'hover:bg-cyan-500/10', 'hover:bg-rose-500/10', 'hover:bg-violet-500/10', 'hover:bg-emerald-500/10',
+    'hover:bg-amber-500/20', 'hover:bg-cyan-500/20', 'hover:bg-rose-500/20', 'hover:bg-violet-500/20', 'hover:bg-emerald-500/20',
+    'hover:text-amber-600', 'hover:text-cyan-600', 'hover:text-rose-600', 'hover:text-violet-600', 'hover:text-emerald-600',
   ],
   theme: { extend: {} },
   plugins: [],
