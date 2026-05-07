@@ -93,9 +93,39 @@ function RadarChart({ scores }: { scores: InMindReport['scores'] }) {
 // ── Body type config ──────────────────────────────────────────────────────────
 
 const BODY_TYPE_META = {
-  C: { label: 'C 型', sublabel: '充電期', color: 'text-rose-600',    bg: 'bg-rose-50',    border: 'border-rose-200',    bar: '░░░░░░░░░░' },
-  I: { label: 'I 型', sublabel: '穩定期', color: 'text-amber-600',   bg: 'bg-amber-50',   border: 'border-amber-200',   bar: '████░░░░░░' },
-  D: { label: 'D 型', sublabel: '蓬勃期', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', bar: '██████████' },
+  C: {
+    emoji: '🍡',
+    name: '棉花糖',
+    inbody: '泡芙人',
+    trait: '高內耗・低核心力',
+    symbol: '體積很大，但一碰就縮小。承擔了許多生活負荷，但內部缺乏核心支撐力，遇到壓力時心理韌性容易迅速瓦解。',
+    color: 'text-rose-600',
+    bg: 'bg-rose-50',
+    border: 'border-rose-200',
+    tagBg: 'bg-rose-100',
+  },
+  I: {
+    emoji: '🍞',
+    name: '吐司',
+    inbody: '一般人',
+    trait: '功能正常・缺乏彈性',
+    symbol: '穩定但缺乏韌性。中規中矩，能應付日常生活，但面對複雜困境時支撐力有限，尚有很大的成長空間。',
+    color: 'text-amber-600',
+    bg: 'bg-amber-50',
+    border: 'border-amber-200',
+    tagBg: 'bg-amber-100',
+  },
+  D: {
+    emoji: '🥯',
+    name: '貝果',
+    inbody: '運動員',
+    trait: '高核心力・低內耗',
+    symbol: '極強的咬勁與紮實度。經得起外在壓力，紮實的心理核心能提供強大支撐，具備高度的反脆弱性。',
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-200',
+    tagBg: 'bg-emerald-100',
+  },
 }
 
 // ── Main report component ─────────────────────────────────────────────────────
@@ -161,19 +191,36 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         </div>
       </div>
 
-      {/* ── 3. CID 心理體型 ── */}
-      <div className={`rounded-2xl border ${bodyMeta.border} ${bodyMeta.bg} p-5 space-y-3`}>
-        <p className="text-xs uppercase tracking-widest text-slate-400">心理體型（CID）</p>
+      {/* ── 3. 心理體型 ── */}
+      <div className={`rounded-2xl border ${bodyMeta.border} ${bodyMeta.bg} p-5 space-y-4`}>
+        <p className="text-xs uppercase tracking-widest text-slate-400">心理體型</p>
+
+        {/* Name + InBody tag */}
         <div className="flex items-center gap-4">
-          <div className={`text-4xl font-black ${bodyMeta.color}`}>{bodyMeta.label}</div>
-          <div>
-            <p className={`font-semibold text-sm ${bodyMeta.color}`}>{body_type_label}</p>
-            <p className="text-slate-400 text-xs">{bodyMeta.sublabel}</p>
+          <span className="text-5xl">{bodyMeta.emoji}</span>
+          <div className="space-y-1">
+            <p className={`text-2xl font-black ${bodyMeta.color}`}>{bodyMeta.name}</p>
+            <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${bodyMeta.tagBg} ${bodyMeta.color} font-medium`}>
+              InBody 對應：{bodyMeta.inbody}
+            </span>
           </div>
         </div>
-        <p className="text-slate-600 text-sm leading-relaxed">{body_type_context}</p>
-        <div className={`font-mono text-lg tracking-widest ${bodyMeta.color} opacity-40`}>
-          {bodyMeta.bar}
+
+        {/* Trait tag */}
+        <div className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${bodyMeta.tagBg} ${bodyMeta.color}`}>
+          {bodyMeta.trait}
+        </div>
+
+        {/* Psychological symbol */}
+        <div className="space-y-1">
+          <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">心理象徵</p>
+          <p className="text-slate-600 text-sm leading-relaxed">{bodyMeta.symbol}</p>
+        </div>
+
+        {/* Personalized AI context */}
+        <div className={`rounded-xl ${bodyMeta.tagBg} border ${bodyMeta.border} p-3`}>
+          <p className="text-xs text-slate-500 mb-1 font-medium">你目前的狀態</p>
+          <p className={`text-sm leading-relaxed ${bodyMeta.color}`}>{body_type_context}</p>
         </div>
       </div>
 
