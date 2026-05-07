@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import html2canvas from 'html2canvas'
 import type { InMindReport, DimensionKey } from '../types'
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
+import ShareCard from './ShareCard'
 
 interface Props {
   report: InMindReport
@@ -142,6 +144,28 @@ export default function InMindReportPage({ report, onRestart }: Props) {
   const weakKey = constitution_advice.weak_dim as DimensionKey
   const maxCfg = DIMENSION_CONFIGS[balance.max_dim]
   const minCfg = DIMENSION_CONFIGS[balance.min_dim]
+
+  const shareCardRef = useRef<HTMLDivElement>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  async function handleDownloadShare() {
+    if (!shareCardRef.current || isGenerating) return
+    setIsGenerating(true)
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        scale: 2.77, // renders at ~1080×1920
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+      })
+      const link = document.createElement('a')
+      link.download = 'inmind-心理體質.png'
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } finally {
+      setIsGenerating(false)
+    }
+  }
 
   return (
     <div className="results-animate w-full max-w-lg flex flex-col gap-5 pb-10">
@@ -382,13 +406,40 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         </div>
       </div>
 
-      {/* ── 重新測驗 ── */}
-      <button
-        onClick={onRestart}
-        className="w-full py-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-500 hover:text-slate-700 transition-colors text-sm font-medium mt-2"
-      >
-        重新測驗
-      </button>
+      {/* ── 分享到 IG ── */}
+      <div className="space-y-3 mt-2">
+        <button
+          onClick={handleDownloadShare}
+          disabled={isGenerating}
+          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 disabled:opacity-60 text-white font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          {isGenerating ? (
+            <>
+              <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              產生圖片中⋯
+            </>
+          ) : (
+            <>
+              <span>📲</span>
+              下載分享卡片（9:16）
+            </>
+          )}
+        </button>
+        <p className="text-center text-xs text-slate-400">儲存後可直接分享到 Instagram 限時動態</p>
+
+        {/* ── 重新測驗 ── */}
+        <button
+          onClick={onRestart}
+          className="w-full py-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-500 hover:text-slate-700 transition-colors text-sm font-medium"
+        >
+          重新測驗
+        </button>
+      </div>
+
+      {/* Hidden share card — captured by html2canvas */}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+        <ShareCard ref={shareCardRef} report={report} />
+      </div>
     </div>
   )
 }
