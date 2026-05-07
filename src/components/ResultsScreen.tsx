@@ -135,11 +135,13 @@ export default function InMindReportPage({ report, onRestart }: Props) {
     scores, individual_analysis, total_score,
     body_type, body_type_context,
     summary_sentence, celeb_match,
-    constitution_advice,
+    constitution_advice, balance, advanced_analysis,
   } = report
 
   const bodyMeta = BODY_TYPE_META[body_type]
   const weakKey = constitution_advice.weak_dim as DimensionKey
+  const maxCfg = DIMENSION_CONFIGS[balance.max_dim]
+  const minCfg = DIMENSION_CONFIGS[balance.min_dim]
 
   return (
     <div className="results-animate w-full max-w-lg flex flex-col gap-5 pb-10">
@@ -224,7 +226,59 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         </div>
       </div>
 
-      {/* ── 4. 五個向度細項建議與下一步行動 ── */}
+      {/* ── 4. 指數均衡分析 ── */}
+      <div className="rounded-2xl bg-white border border-blue-100 shadow-sm p-5 space-y-5">
+        <p className="text-xs uppercase tracking-widest text-slate-400">指數均衡分析</p>
+
+        {/* Max vs Min visual */}
+        <div className="flex items-center gap-3">
+          <div className={`flex-1 rounded-xl ${maxCfg.bgLight} border ${maxCfg.borderLight} p-3 text-center space-y-1`}>
+            <p className="text-slate-400 text-xs">最高指數</p>
+            <p className="text-2xl">{maxCfg.icon}</p>
+            <p className={`font-bold text-sm ${maxCfg.textColor}`}>{maxCfg.label}</p>
+            <p className={`font-mono font-black text-lg ${maxCfg.textColor}`}>{scores[balance.max_dim].toFixed(1)}</p>
+          </div>
+          <div className="flex flex-col items-center gap-1 px-1">
+            <span className="text-slate-300 text-xl">↕</span>
+            <span className="font-mono font-bold text-slate-700 text-sm">Δ {balance.delta.toFixed(1)}</span>
+            <span className="text-slate-400 text-xs">差距</span>
+          </div>
+          <div className={`flex-1 rounded-xl ${minCfg.bgLight} border ${minCfg.borderLight} p-3 text-center space-y-1`}>
+            <p className="text-slate-400 text-xs">最低指數</p>
+            <p className="text-2xl">{minCfg.icon}</p>
+            <p className={`font-bold text-sm ${minCfg.textColor}`}>{minCfg.label}</p>
+            <p className={`font-mono font-black text-lg ${minCfg.textColor}`}>{scores[balance.min_dim].toFixed(1)}</p>
+          </div>
+        </div>
+
+        {/* Gap meaning */}
+        <div className="space-y-1">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">差距的意義</p>
+          <p className="text-slate-600 text-sm leading-relaxed">{balance.assessment}</p>
+        </div>
+
+        {/* Complementary person */}
+        <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4 space-y-3">
+          <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">🤝 你的互補對象</p>
+          <p className="text-slate-600 text-sm leading-relaxed">{advanced_analysis.synergy_explanation}</p>
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-indigo-500">他們的特質與如何找到他們</p>
+            <p className="text-slate-600 text-sm leading-relaxed">{advanced_analysis.partnership_profile}</p>
+          </div>
+        </div>
+
+        {/* Encouragement */}
+        <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4">
+          <p className="text-emerald-700 text-sm leading-relaxed font-medium">
+            🌱 {advanced_analysis.next_step_action}
+          </p>
+          <p className="text-emerald-600 text-xs mt-2 leading-relaxed">
+            身邊就有這樣的人——可能是朋友、同事，或還未深入認識的人。主動靠近他，你們的幸福感加在一起，會比各自單獨擁有時還要更大。
+          </p>
+        </div>
+      </div>
+
+      {/* ── 5. 五個向度細項建議與下一步行動 ── */}
       <div className="space-y-3">
         <p className="text-xs uppercase tracking-widest text-slate-400 pl-1">五大指數 · 細項建議與行動</p>
 
