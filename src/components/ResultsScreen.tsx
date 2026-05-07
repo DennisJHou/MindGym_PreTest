@@ -78,7 +78,7 @@ function RadarChart({ scores }: { scores: InMindReport['scores'] }) {
         return (
           <g key={k}>
             <text x={v.x} y={v.y - 5} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill={colors[i]} fontWeight="700">
-              {DIMENSION_CONFIGS[k].icon} {k}
+              {DIMENSION_CONFIGS[k].icon} {DIMENSION_CONFIGS[k].label}
             </text>
             <text x={v.x} y={v.y + 7} textAnchor="middle" dominantBaseline="middle" fontSize="6.5" fill="#94a3b8">
               {scores[k].toFixed(1)}
