@@ -72,33 +72,11 @@ class CelebMatchResponse(BaseModel):
     description: str = Field(description="名人的簡短描述 (繁體中文, ≤50字)")
     reason: str = Field(description="為什麼這位名人最像你 (繁體中文, ≤100字)")
 
-class ConstitutionAdviceResponse(BaseModel):
-    weak_dim: str = Field(description="最弱的面向，一個英文字母: P/E/R/M/A")
-    short_term_plan: str = Field(description="短期改善計畫 (2-4周) (繁體中文, ≤80字)")
-    long_term_plan: str = Field(description="長期鍛鍊計畫 (3個月以上) (繁體中文, ≤100字)")
-    daily_practice: str = Field(description="每日可執行的練習 (繁體中文, ≤60字)")
-
-class AdvancedAnalysisResponse(BaseModel):
-    complementary_dim: str = Field(description="與最弱面向互補的面向，一個英文字母: P/E/R/M/A")
-    synergy_explanation: str = Field(description="兩個面向如何互補 (繁體中文, ≤80字)")
-    next_step_action: str = Field(description="具體的下一步行動 (繁體中文, ≤80字)")
-    partnership_profile: str = Field(description="什麼樣的人可以與你搭配，創造更多幸福 (繁體中文, ≤100字)")
-
-class TakeActionPlan(BaseModel):
-    daily_habit: str = Field(description="一個今天就能開始、每天5分鐘內可完成的微習慣，具體且可執行 (繁體中文, ≤50字)")
-    after_3_days: str = Field(description="持續3天後，使用者會注意到的第一個細微變化 (繁體中文, ≤40字)")
-    after_1_week: str = Field(description="持續1週後，在情緒或行為上可以感受到的變化 (繁體中文, ≤50字)")
-    after_2_weeks: str = Field(description="持續2週後，周圍環境或人際關係上出現的改變 (繁體中文, ≤55字)")
-    after_1_month: str = Field(description="持續1個月後，整體心理狀態與生活品質的轉變 (繁體中文, ≤60字)")
-
 class InMindLLMResponse(BaseModel):
     scores: PermaScores
     individual_analysis: AllDimensionAnalysis
     summary_sentence: str = Field(description="一句話概述使用者的整體幸福體質樣態，語氣溫暖有力，20-35字 (繁體中文)")
     celeb_match: CelebMatchResponse
-    constitution_advice: ConstitutionAdviceResponse
-    advanced_analysis: AdvancedAnalysisResponse
-    take_action: TakeActionPlan
 
 # ── System prompt ─────────────────────────────────────────────────────────────
 
@@ -128,20 +106,6 @@ SYSTEM_PROMPT = """你是 InMind，一位受過正向心理學訓練的 AI 心�
 1. **summary_sentence**：用一句話概述使用者的整體幸福體質樣態，語氣溫暖有力，20-35字
 
 2. **celeb_match**：根據使用者的 PERMA 分數模式，找出一位與其特質最相似的名人（可跨文化，如企業家、藝術家、運動員等），說明理由
-
-3. **constitution_advice**：識別最弱的面向，並提供：
-   - 短期改善計畫（2-4週內可實施）
-   - 長期鍛鍊計畫（3個月以上的持續練習）
-   - 每日可執行的微型練習
-
-4. **advanced_analysis**：分析最弱面向與哪個面向最互補，提供：
-   - 兩個面向如何互補創造幸福的解釋
-   - 具體的下一步行動建議
-   - 什麼樣特質的人可以與使用者搭配，協同創造更多幸福
-
-5. **take_action**：針對使用者最需要強化的面向，設計一個微習慣行動計畫：
-   - 一個每天5分鐘內可完成的具體微習慣
-   - 描述持續 3天、1週、2週、1個月後會出現的漸進式變化（要結合使用者的測驗結果與生活情境）
 
 ## 輸出規則
 
@@ -203,6 +167,106 @@ def compute_balance(scores: dict) -> dict:
         "advice": advice,
     }
 
+# ── Templates: 依弱項決定的標準建議 ─────────────────────────────────────────
+
+DIMENSION_TEMPLATES = {
+    "P": {
+        "short_term_plan": "每晚睡前花 2 分鐘，寫下今天 3 件讓你心情變好的小事，培養感受愉悅的敏銳度。",
+        "long_term_plan": "建立每週 1-2 次的「情緒充電行程」，重複能讓你愉悅的活動，並嘗試擴展新的快樂來源。",
+        "daily_practice": "用 1 分鐘深呼吸，回想今天最舒服的瞬間，讓身體記住那種感覺。",
+        "next_step_action": "找一個容易感染你好心情的朋友，每週至少一次跟他輕鬆相處 30 分鐘。",
+        "partnership_profile": "樂觀開朗、容易被生活小事感動、笑點低、會主動分享美好瞬間的人。在你的同事、社群或興趣圈裡留意這種能量正向的人。",
+        "daily_habit": "每天起床後用 30 秒，回想一件今天值得期待的小事。",
+        "after_3_days": "你會開始注意到生活中原本被忽略的小確幸。",
+        "after_1_week": "面對日常壓力時，會更快找回平靜。",
+        "after_2_weeks": "身邊的人開始說你變得『比較好相處』。",
+        "after_1_month": "你的情緒底色從中性變得更明亮、更有彈性。",
+    },
+    "E": {
+        "short_term_plan": "每天挑一個小任務，關掉通知、設定 25 分鐘專注時段，記錄完成後的感受。",
+        "long_term_plan": "每月嘗試一項新興趣或技能，找出讓你進入「心流」的活動類型。",
+        "daily_practice": "做事前先問自己：「我可以多投入 5% 嗎？」然後開始。",
+        "next_step_action": "找一個對某事物極度熱衷的朋友，邀請他帶你體驗他的世界。",
+        "partnership_profile": "對某個興趣或專業極度投入、聊起來眼睛會發光、能進入心流忘我工作的人。",
+        "daily_habit": "每天選 1 件事，全程專注做完不分心（手機放抽屜或開飛航模式）。",
+        "after_3_days": "你會驚訝於自己原本可以做到的效率。",
+        "after_1_week": "工作中分心被打斷的次數明顯下降。",
+        "after_2_weeks": "你開始能進入一種「時間飛逝」的專注狀態。",
+        "after_1_month": "你會找到至少一件能讓你完全沉浸其中的事。",
+    },
+    "R": {
+        "short_term_plan": "本週主動聯絡 3 個你想念但很久沒聯絡的朋友，問候不需要有目的。",
+        "long_term_plan": "建立每月固定的「關係維繫日」，安排與重要的人深度相處的時間。",
+        "daily_practice": "每天傳一則溫暖訊息給某個人，告訴他你的感謝或想念。",
+        "next_step_action": "本週找一個讓你信任的人，分享一件你最近的真實感受。",
+        "partnership_profile": "善於傾聽、體貼他人感受、有穩定支持網絡、會記得你重要日子的人。",
+        "daily_habit": "每天主動向一個人問好或說一句感謝（家人、朋友、同事、店員都行）。",
+        "after_3_days": "你會發現有人開始更熱情地回應你。",
+        "after_1_week": "你會收到至少一個溫暖的回饋訊息。",
+        "after_2_weeks": "你的人際圈會出現一個新的或重新連結的關係。",
+        "after_1_month": "你會擁有 2-3 個能說真心話的「安全對象」。",
+    },
+    "M": {
+        "short_term_plan": "每週寫下一個「為什麼我做這件事」，找出日常選擇背後的價值觀。",
+        "long_term_plan": "撰寫個人使命宣言，每月檢視自己的行動是否與真正在乎的事一致。",
+        "daily_practice": "睡前問自己：「今天有哪一刻覺得自己活得像自己？」",
+        "next_step_action": "本週與一位你欽佩的人聊聊，問問他做事的初衷與動力。",
+        "partnership_profile": "對人生有清晰使命感、能講出自己的價值觀、行動與信念一致的人。",
+        "daily_habit": "每天結束前用 1 分鐘問自己：「今天哪件事讓我覺得有意義？」並寫下一句。",
+        "after_3_days": "你會開始辨認出哪些事情其實只是「習慣」而非「重要」。",
+        "after_1_week": "你會更勇於拒絕不在乎的事情。",
+        "after_2_weeks": "你的時間分配會出現微妙但明確的轉移。",
+        "after_1_month": "你會逐漸構建出屬於自己的人生方向感。",
+    },
+    "A": {
+        "short_term_plan": "本週設定一個小到不可能失敗的目標，並具體規劃每天怎麼達成。",
+        "long_term_plan": "每月設定一個 3 個月內可達成的中期目標，追蹤進度與調整方法。",
+        "daily_practice": "每天睡前寫下一件今天完成的事，再小都算。",
+        "next_step_action": "本週找一位執行力強的朋友，請他見證你的某個目標並定期檢查進度。",
+        "partnership_profile": "目標導向、執行力強、有自律習慣、能持續推進計畫不放棄的人。",
+        "daily_habit": "每天早上寫下「今日最重要的 1 件事」並優先完成。",
+        "after_3_days": "你會開始有「今天有把事情做完」的踏實感。",
+        "after_1_week": "拖延的次數明顯減少，行動阻力變低。",
+        "after_2_weeks": "你開始累積出可見的小成果。",
+        "after_1_month": "你會看見自己離某個目標明顯靠近一大步。",
+    },
+}
+
+def build_constitution_advice(weak_dim: str) -> dict:
+    tpl = DIMENSION_TEMPLATES[weak_dim]
+    return {
+        "weak_dim": weak_dim,
+        "short_term_plan": tpl["short_term_plan"],
+        "long_term_plan": tpl["long_term_plan"],
+        "daily_practice": tpl["daily_practice"],
+    }
+
+def build_advanced_analysis(weak_dim: str, max_dim: str) -> dict:
+    tpl = DIMENSION_TEMPLATES[weak_dim]
+    weak_label = _DIM_LABELS[weak_dim]
+    max_label = _DIM_LABELS[max_dim]
+    synergy = (
+        f"你優勢的「{max_label}」能為關係注入價值與動力，"
+        f"而對方強大的「{weak_label}」能補足你最不足的部分，"
+        f"兩種特質結合能讓你們彼此撐持、互相填滿。"
+    )
+    return {
+        "complementary_dim": weak_dim,
+        "synergy_explanation": synergy,
+        "next_step_action": tpl["next_step_action"],
+        "partnership_profile": tpl["partnership_profile"],
+    }
+
+def build_take_action(weak_dim: str) -> dict:
+    tpl = DIMENSION_TEMPLATES[weak_dim]
+    return {
+        "daily_habit": tpl["daily_habit"],
+        "after_3_days": tpl["after_3_days"],
+        "after_1_week": tpl["after_1_week"],
+        "after_2_weeks": tpl["after_2_weeks"],
+        "after_1_month": tpl["after_1_month"],
+    }
+
 # ── Helper: percentile (mock normal distribution) ─────────────────────────────
 
 def _normal_cdf(x: float, mu: float, sigma: float) -> float:
@@ -254,7 +318,7 @@ async def generate_report(answers: NarrativeAnswers):
     try:
         response = client.messages.parse(
             model="claude-sonnet-4-5",
-            max_tokens=5000,
+            max_tokens=2500,
             temperature=0.2,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_content}],
@@ -275,6 +339,13 @@ async def generate_report(answers: NarrativeAnswers):
         balance = compute_balance(scores_dict)
         percentile = compute_percentile(total)
 
+        # Compose deterministic content from templates (saves AI tokens)
+        weak_dim = balance["min_dim"]
+        max_dim = balance["max_dim"]
+        constitution_advice = build_constitution_advice(weak_dim)
+        advanced_analysis = build_advanced_analysis(weak_dim, max_dim)
+        take_action = build_take_action(weak_dim)
+
         response_data = {
             "scores": scores_dict,
             "individual_analysis": result.individual_analysis.model_dump(),
@@ -286,9 +357,9 @@ async def generate_report(answers: NarrativeAnswers):
             "percentile": percentile,
             "summary_sentence": result.summary_sentence,
             "celeb_match": result.celeb_match.model_dump(),
-            "constitution_advice": result.constitution_advice.model_dump(),
-            "advanced_analysis": result.advanced_analysis.model_dump(),
-            "take_action": result.take_action.model_dump(),
+            "constitution_advice": constitution_advice,
+            "advanced_analysis": advanced_analysis,
+            "take_action": take_action,
         }
 
         # Save to Supabase
