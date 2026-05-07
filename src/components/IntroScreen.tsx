@@ -63,16 +63,19 @@ export default function LandingPage({ onStart }: Props) {
           return (
             <div
               key={key}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl bg-white border ${cfg.borderLight} shadow-sm`}
+              className={`px-4 py-3 rounded-xl bg-white border ${cfg.borderLight} shadow-sm space-y-1`}
             >
-              <span className="text-xl">{cfg.icon}</span>
-              <div className="flex-1 min-w-0">
-                <span className={`font-semibold text-sm ${cfg.textColor}`}>{cfg.label}</span>
-                <span className="text-slate-400 text-xs ml-2">{cfg.sublabel}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{cfg.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <span className={`font-semibold text-sm ${cfg.textColor}`}>{cfg.label}</span>
+                  <span className="text-slate-400 text-xs ml-2">{cfg.sublabel}</span>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${cfg.bgMed} ${cfg.textColor} border ${cfg.borderLight} font-mono font-bold`}>
+                  {key}
+                </span>
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${cfg.bgMed} ${cfg.textColor} border ${cfg.borderLight} font-mono font-bold`}>
-                {key}
-              </span>
+              <p className="text-slate-500 text-xs leading-relaxed pl-8">{cfg.description}</p>
             </div>
           )
         })}

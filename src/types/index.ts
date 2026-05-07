@@ -11,6 +11,7 @@ export interface DimensionConfig {
   icon: string
   label: string
   sublabel: string
+  description: string  // One-sentence explanation shown on landing page
   question: string
   hints: string[]      // Sub-questions revealed on demand
   textColor: string
@@ -29,6 +30,7 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '☀️',
     label: '情緒力',
     sublabel: 'Positive Emotion',
+    description: '感受日常喜悅、享受生命美好時刻的能力。',
     question: '請分享你上一次發自內心感到愉悅的經驗。',
     hints: [
       '那個時刻具體發生了什麼事？',
@@ -48,6 +50,7 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '🌊',
     label: '投入力',
     sublabel: 'Engagement',
+    description: '全神貫注投入一件事、進入心流狀態的能力。',
     question: '請分享你最近一次全神貫注做一件事的感受。',
     hints: [
       '當時你在處理什麼任務？是什麼讓你如此入迷？',
@@ -67,6 +70,7 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '🧲',
     label: '連結力',
     sublabel: 'Relationships',
+    description: '與他人建立深刻連結、感受支持與歸屬感的能力。',
     question: '在你生活當中，哪些人會在你需要的時候支持你？',
     hints: [
       '他們通常是以什麼方式提供支持？（例如：傾聽、給予建議、或實質幫忙）',
@@ -86,6 +90,7 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '🏔',
     label: '意義力',
     sublabel: 'Meaning',
+    description: '找到生命目的、讓行動與內在價值觀一致的能力。',
     question: '你覺得你生活的目的和意義是什麼？',
     hints: [
       '在日常生活中，哪些時刻會讓你覺得「這一切都是值得的」？',
@@ -105,6 +110,7 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     icon: '⚡',
     label: '成就力',
     sublabel: 'Accomplishment',
+    description: '設定目標、持續推進並看見自身成長的能力。',
     question: '在過去三個月，你覺得你是離你的目標越來越近，還是越來越遠？',
     hints: [
       '是什麼關鍵事件讓你產生「靠近」或「遠離」的感覺？',
