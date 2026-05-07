@@ -179,6 +179,14 @@ export interface AdvancedAnalysis {
   partnership_profile: string
 }
 
+export interface TakeActionPlan {
+  daily_habit: string
+  after_3_days: string
+  after_1_week: string
+  after_2_weeks: string
+  after_1_month: string
+}
+
 export interface InMindReport {
   scores: PermaScores
   individual_analysis: Record<DimensionKey, DimensionAnalysis>
@@ -192,6 +200,7 @@ export interface InMindReport {
   celeb_match: CelebMatch
   constitution_advice: ConstitutionAdvice
   advanced_analysis: AdvancedAnalysis
+  take_action: TakeActionPlan
 }
 
 // ── App State ─────────────────────────────────────────────────────────────────

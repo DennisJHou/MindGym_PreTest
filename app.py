@@ -84,6 +84,13 @@ class AdvancedAnalysisResponse(BaseModel):
     next_step_action: str = Field(description="具體的下一步行動 (繁體中文, ≤80字)")
     partnership_profile: str = Field(description="什麼樣的人可以與你搭配，創造更多幸福 (繁體中文, ≤100字)")
 
+class TakeActionPlan(BaseModel):
+    daily_habit: str = Field(description="一個今天就能開始、每天5分鐘內可完成的微習慣，具體且可執行 (繁體中文, ≤50字)")
+    after_3_days: str = Field(description="持續3天後，使用者會注意到的第一個細微變化 (繁體中文, ≤40字)")
+    after_1_week: str = Field(description="持續1週後，在情緒或行為上可以感受到的變化 (繁體中文, ≤50字)")
+    after_2_weeks: str = Field(description="持續2週後，周圍環境或人際關係上出現的改變 (繁體中文, ≤55字)")
+    after_1_month: str = Field(description="持續1個月後，整體心理狀態與生活品質的轉變 (繁體中文, ≤60字)")
+
 class InMindLLMResponse(BaseModel):
     scores: PermaScores
     individual_analysis: AllDimensionAnalysis
@@ -91,6 +98,7 @@ class InMindLLMResponse(BaseModel):
     celeb_match: CelebMatchResponse
     constitution_advice: ConstitutionAdviceResponse
     advanced_analysis: AdvancedAnalysisResponse
+    take_action: TakeActionPlan
 
 # ── System prompt ─────────────────────────────────────────────────────────────
 
@@ -130,6 +138,10 @@ SYSTEM_PROMPT = """你是 InMind，一位受過正向心理學訓練的 AI 心�
    - 兩個面向如何互補創造幸福的解釋
    - 具體的下一步行動建議
    - 什麼樣特質的人可以與使用者搭配，協同創造更多幸福
+
+5. **take_action**：針對使用者最需要強化的面向，設計一個微習慣行動計畫：
+   - 一個每天5分鐘內可完成的具體微習慣
+   - 描述持續 3天、1週、2週、1個月後會出現的漸進式變化（要結合使用者的測驗結果與生活情境）
 
 ## 輸出規則
 
@@ -276,6 +288,7 @@ async def generate_report(answers: NarrativeAnswers):
             "celeb_match": result.celeb_match.model_dump(),
             "constitution_advice": result.constitution_advice.model_dump(),
             "advanced_analysis": result.advanced_analysis.model_dump(),
+            "take_action": result.take_action.model_dump(),
         }
 
         # Save to Supabase

@@ -135,7 +135,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
     scores, individual_analysis, total_score,
     body_type, body_type_context,
     summary_sentence, celeb_match,
-    constitution_advice, balance, advanced_analysis,
+    constitution_advice, balance, advanced_analysis, take_action,
   } = report
 
   const bodyMeta = BODY_TYPE_META[body_type]
@@ -341,6 +341,45 @@ export default function InMindReportPage({ report, onRestart }: Props) {
             </div>
           )
         })}
+      </div>
+
+      {/* ── 6. Take Action ── */}
+      <div className="rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 p-5 space-y-5">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-widest text-slate-400">Take Action</p>
+          <p className="text-white font-bold text-base">每天一個微習慣</p>
+        </div>
+
+        {/* Daily habit highlight */}
+        <div className="rounded-xl bg-indigo-500/20 border border-indigo-400/30 p-4">
+          <p className="text-indigo-300 text-xs font-semibold mb-2 uppercase tracking-wide">⚡ 從今天開始</p>
+          <p className="text-white text-sm leading-relaxed font-medium">{take_action.daily_habit}</p>
+        </div>
+
+        {/* Progress timeline */}
+        <div className="space-y-0">
+          <p className="text-slate-400 text-xs uppercase tracking-wide mb-3">堅持之後，你會發現⋯</p>
+
+          {[
+            { label: '第 3 天', text: take_action.after_3_days,  dot: 'bg-slate-500' },
+            { label: '第 1 週', text: take_action.after_1_week,  dot: 'bg-indigo-400' },
+            { label: '第 2 週', text: take_action.after_2_weeks, dot: 'bg-violet-400' },
+            { label: '第 1 個月', text: take_action.after_1_month, dot: 'bg-emerald-400' },
+          ].map(({ label, text, dot }, i, arr) => (
+            <div key={label} className="flex gap-3">
+              {/* Timeline spine */}
+              <div className="flex flex-col items-center">
+                <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${dot}`} />
+                {i < arr.length - 1 && <div className="w-px flex-1 bg-slate-700 my-1" />}
+              </div>
+              {/* Content */}
+              <div className={`pb-4 ${i < arr.length - 1 ? '' : 'pb-0'}`}>
+                <p className="text-xs font-semibold text-slate-400 mb-0.5">{label}</p>
+                <p className="text-slate-200 text-sm leading-relaxed">{text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── 重新測驗 ── */}
