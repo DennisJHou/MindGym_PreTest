@@ -105,12 +105,11 @@ export default function InMindReportPage({ report, onRestart }: Props) {
     scores, individual_analysis, total_score,
     body_type, body_type_label, body_type_context,
     summary_sentence, celeb_match,
-    constitution_advice, advanced_analysis,
+    constitution_advice,
   } = report
 
   const bodyMeta = BODY_TYPE_META[body_type]
   const weakKey = constitution_advice.weak_dim as DimensionKey
-  const weakCfg = DIMENSION_CONFIGS[weakKey] ?? DIMENSION_CONFIGS['P']
 
   return (
     <div className="results-animate w-full max-w-lg flex flex-col gap-5 pb-10">
