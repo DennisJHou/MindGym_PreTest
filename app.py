@@ -56,9 +56,9 @@ class PermaScores(BaseModel):
     A: float = Field(ge=1, le=5, description="Accomplishment score 1-5")
 
 class DimensionAnalysis(BaseModel):
-    score_reason: str = Field(description="Evidence from the user text justifying the score (繁體中文, ≤80字)")
-    comment: str = Field(description="Psychological commentary on this dimension (繁體中文, ≤100字)")
-    exercise_suggestion: str = Field(description="Concrete actionable micro-exercise (繁體中文, ≤80字)")
+    score_reason: str = Field(description="Evidence from the user text justifying the score (繁體中文, ≤60字)")
+    comment: str = Field(description="Psychological commentary on this dimension, 精簡有力 (繁體中文, ≤60字)")
+    exercise_suggestion: str = Field(description="Concrete actionable micro-exercise, 一句話說清楚 (繁體中文, ≤50字)")
 
 class AllDimensionAnalysis(BaseModel):
     P: DimensionAnalysis

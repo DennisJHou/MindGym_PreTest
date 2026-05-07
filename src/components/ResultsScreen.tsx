@@ -315,32 +315,29 @@ export default function InMindReportPage({ report, onRestart }: Props) {
                 <AnimatedBar score={scores[key]} gradientBar={cfg.gradientBar} />
               </div>
 
-              {/* Psychological insight */}
-              <div className="space-y-1">
-                <p className={`text-xs font-semibold uppercase tracking-wide ${cfg.textColor}`}>心理解析</p>
-                <p className="text-slate-600 text-sm leading-relaxed">{analysis.comment}</p>
-              </div>
-
-              {/* Next step action */}
-              <div className={`rounded-xl ${cfg.bgLight} border ${cfg.borderLight} p-3 space-y-1`}>
-                <p className={`text-xs font-semibold uppercase tracking-wide ${cfg.textColor}`}>⚡ 下一步行動</p>
-                <p className="text-slate-700 text-sm leading-relaxed">{analysis.exercise_suggestion}</p>
-              </div>
-
-              {/* For weak dimension: add short-term plan & daily practice */}
-              {isWeak && (
-                <div className="space-y-2 pt-1 border-t border-slate-100">
-                  <p className="text-xs text-slate-400 uppercase tracking-wide font-semibold">💪 加強計畫</p>
-                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 space-y-1">
-                    <p className="text-xs text-slate-500 font-medium">📅 短期（2-4週）</p>
-                    <p className="text-slate-700 text-xs leading-relaxed">{constitution_advice.short_term_plan}</p>
-                  </div>
-                  <div className="rounded-xl bg-slate-50 border border-slate-200 p-3 space-y-1">
-                    <p className="text-xs text-slate-500 font-medium">🌱 每日練習</p>
-                    <p className="text-slate-700 text-xs leading-relaxed">{constitution_advice.daily_practice}</p>
-                  </div>
-                </div>
-              )}
+              {/* Bullet list */}
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className={`mt-1 shrink-0 text-xs font-black ${cfg.textColor}`}>•</span>
+                  <p className="text-slate-600 text-sm leading-relaxed">{analysis.comment}</p>
+                </li>
+                <li className={`flex items-start gap-2 rounded-xl ${cfg.bgLight} px-3 py-2`}>
+                  <span className="mt-0.5 shrink-0 text-sm">⚡</span>
+                  <p className="text-slate-700 text-sm leading-relaxed">{analysis.exercise_suggestion}</p>
+                </li>
+                {isWeak && (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 shrink-0 text-sm">📅</span>
+                      <p className="text-slate-600 text-xs leading-relaxed">{constitution_advice.short_term_plan}</p>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 shrink-0 text-sm">🌱</span>
+                      <p className="text-slate-600 text-xs leading-relaxed">{constitution_advice.daily_practice}</p>
+                    </li>
+                  </>
+                )}
+              </ul>
             </div>
           )
         })}
