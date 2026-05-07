@@ -133,7 +133,7 @@ const BODY_TYPE_META = {
 export default function InMindReportPage({ report, onRestart }: Props) {
   const {
     scores, individual_analysis, total_score,
-    body_type, body_type_label, body_type_context,
+    body_type, body_type_context,
     summary_sentence, celeb_match,
     constitution_advice,
   } = report
