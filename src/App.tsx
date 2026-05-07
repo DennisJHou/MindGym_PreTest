@@ -22,7 +22,7 @@ function LoadingScreen() {
           InMind AI 正在分析
         </p>
         <p className="text-slate-400 text-xs max-w-xs">
-          根據你的敘事，進行 PERMA 深度評估中⋯⋯
+          根據你的敘事，進行 PERMA 深度測驗分析中⋯⋯
         </p>
       </div>
 

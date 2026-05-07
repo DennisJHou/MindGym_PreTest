@@ -108,7 +108,7 @@ export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, o
           ref={textareaRef}
           value={currentText}
           onChange={(e) => handleChange(e.target.value)}
-          placeholder="請在這裡輸入你的故事或感受，越詳細越好～ AI 會根據你的描述進行深度評估。"
+          placeholder="請在這裡輸入你的故事或感受，越詳細越好～ AI 會根據你的描述進行深度測驗分析。"
           rows={6}
           className={`
             w-full rounded-xl bg-white border text-slate-700 placeholder-slate-300

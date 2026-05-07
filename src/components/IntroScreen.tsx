@@ -16,7 +16,7 @@ export default function LandingPage({ onStart }: Props) {
           心理健康的 InBody
         </h1>
         <p className="text-indigo-500 text-sm font-medium tracking-wide">
-          PSY by PSY 心理健身房｜免費檢測活動
+          PSY by PSY 心理健身房｜免費測驗活動
         </p>
       </div>
 
@@ -61,7 +61,7 @@ export default function LandingPage({ onStart }: Props) {
         onClick={onStart}
         className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors font-bold text-white tracking-wide shadow-lg shadow-indigo-200 text-base"
       >
-        開始心理檢測
+        開始心理測驗
       </button>
 
       <p className="text-slate-400 text-xs text-center pb-2">

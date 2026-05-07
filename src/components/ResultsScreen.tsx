@@ -362,7 +362,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         onClick={onRestart}
         className="w-full py-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-500 hover:text-slate-700 transition-colors text-sm font-medium mt-2"
       >
-        重新檢測
+        重新測驗
       </button>
     </div>
   )
