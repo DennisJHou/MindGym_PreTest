@@ -188,6 +188,7 @@ export interface InMindReport {
   body_type_context: string
   balance: BalanceInfo
   percentile: PercentileInfo
+  summary_sentence: string
   celeb_match: CelebMatch
   constitution_advice: ConstitutionAdvice
   advanced_analysis: AdvancedAnalysis

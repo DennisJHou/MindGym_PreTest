@@ -87,6 +87,7 @@ class AdvancedAnalysisResponse(BaseModel):
 class InMindLLMResponse(BaseModel):
     scores: PermaScores
     individual_analysis: AllDimensionAnalysis
+    summary_sentence: str = Field(description="一句話概述使用者的整體幸福體質樣態，語氣溫暖有力，20-35字 (繁體中文)")
     celeb_match: CelebMatchResponse
     constitution_advice: ConstitutionAdviceResponse
     advanced_analysis: AdvancedAnalysisResponse
@@ -116,14 +117,16 @@ SYSTEM_PROMPT = """你是 InMind，一位受過正向心理學訓練的 AI 心�
 
 除了評分和個別分析外，你還需要提供：
 
-1. **celeb_match**：根據使用者的 PERMA 分數模式，找出一位與其特質最相似的名人（可跨文化，如企業家、藝術家、運動員等），說明理由
+1. **summary_sentence**：用一句話概述使用者的整體幸福體質樣態，語氣溫暖有力，20-35字
 
-2. **constitution_advice**：識別最弱的面向，並提供：
+2. **celeb_match**：根據使用者的 PERMA 分數模式，找出一位與其特質最相似的名人（可跨文化，如企業家、藝術家、運動員等），說明理由
+
+3. **constitution_advice**：識別最弱的面向，並提供：
    - 短期改善計畫（2-4週內可實施）
    - 長期鍛鍊計畫（3個月以上的持續練習）
    - 每日可執行的微型練習
 
-3. **advanced_analysis**：分析最弱面向與哪個面向最互補，提供：
+4. **advanced_analysis**：分析最弱面向與哪個面向最互補，提供：
    - 兩個面向如何互補創造幸福的解釋
    - 具體的下一步行動建議
    - 什麼樣特質的人可以與使用者搭配，協同創造更多幸福
@@ -269,6 +272,7 @@ async def generate_report(answers: NarrativeAnswers):
             "body_type_context": body_type_context,
             "balance": balance,
             "percentile": percentile,
+            "summary_sentence": result.summary_sentence,
             "celeb_match": result.celeb_match.model_dump(),
             "constitution_advice": result.constitution_advice.model_dump(),
             "advanced_analysis": result.advanced_analysis.model_dump(),
