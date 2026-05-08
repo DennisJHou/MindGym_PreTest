@@ -71,11 +71,11 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     label: '連結力',
     sublabel: 'Relationships',
     description: '與他人建立深刻連結、感受支持與歸屬感的能力。',
-    question: '在你生活當中，哪些人會在你需要的時候支持你？',
+    question: '分享一次你在日常生活中感受到被身邊的人支持、被愛的時刻。',
     hints: [
-      '他們通常是以什麼方式提供支持？（例如：傾聽、給予建議、或實質幫忙）',
+      '他們通常是以什麼方式提供支持？（例如：傾聽理解、付出行動、耐心陪伴）',
       '你上一次向他們尋求支持或分享脆弱是什麼時候？',
-      '想到這些人的存在，會讓你現在的心境有什麼變化？',
+      '他們都會如何回應你？這是你滿意的嗎？',
     ],
     textColor: 'text-rose-600',
     bgLight: 'bg-rose-500/10',
@@ -91,7 +91,7 @@ export const DIMENSION_CONFIGS: Record<DimensionKey, DimensionConfig> = {
     label: '意義力',
     sublabel: 'Meaning',
     description: '找到生命目的、讓行動與內在價值觀一致的能力。',
-    question: '你覺得你生活的目的和意義是什麼？',
+    question: '在你的生命中，有哪些活動或重要的時刻對你來說是有意義的？',
     hints: [
       '在日常生活中，哪些時刻會讓你覺得「這一切都是值得的」？',
       '你最重視的價值觀是什麼？它如何體現在你的行動中？',
