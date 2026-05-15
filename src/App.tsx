@@ -156,7 +156,7 @@ export default function App() {
   return (
     <div
       className="inmind-scroll"
-      style={{ height: '100%', overflowY: 'auto', background: '#fff' }}
+      style={{ minHeight: '100vh', background: '#fff' }}
     >
       {screen === 'landing' && <LandingPage onStart={handleStart} />}
       {screen === 'quiz' && (

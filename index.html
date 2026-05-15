@@ -31,22 +31,19 @@
       html, body {
         margin: 0;
         padding: 0;
-        background: #e9e7e2;
+        background: #ffffff;
         font-family: "Noto Sans TC", "Inter", system-ui, sans-serif;
         color: var(--ink);
       }
       body {
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
+        min-height: 100vh;
       }
       #root {
-        width: 402px;
-        height: 874px;
-        transform-origin: center center;
-        flex-shrink: 0;
+        width: 100%;
+        max-width: 440px;
+        min-height: 100vh;
+        margin: 0 auto;
+        background: #ffffff;
       }
       .num {
         font-family: "Inter", "Noto Sans TC", sans-serif;
@@ -80,17 +77,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      function fitPhone() {
-        const root = document.getElementById('root');
-        if (!root) return;
-        const PW = 402, PH = 874, PAD = 24;
-        const scale = Math.min(1, (window.innerWidth - PAD) / PW, (window.innerHeight - PAD) / PH);
-        root.style.transform = scale < 0.999 ? `scale(${scale})` : '';
-      }
-      window.addEventListener('resize', fitPhone);
-      fitPhone();
-      setTimeout(fitPhone, 200);
-    </script>
   </body>
 </html>
