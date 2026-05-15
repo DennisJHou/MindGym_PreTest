@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { NarrativeAnswers } from '../types'
+import type { DimensionKey, NarrativeAnswers } from '../types'
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
 
 interface Props {
@@ -11,35 +11,174 @@ interface Props {
 
 const MIN_CHARS = 30
 
+const DOT_COLOR: Record<DimensionKey, string> = {
+  P: '#E26D5C',
+  E: '#5C95FF',
+  R: '#D6FFB7',
+  M: '#292F56',
+  A: '#FFDDB9',
+}
+
+// Letters that need a dark glyph because their accent colour is light
+const DARK_GLYPH: Record<DimensionKey, boolean> = {
+  P: false,
+  E: false,
+  R: true,
+  M: false,
+  A: true,
+}
+
+const ORDINAL = ['一', '二', '三', '四', '五']
+
+// ── Top bar with progress dots ──────────────────────────────
+function ProgressHeader({ step }: { step: number }) {
+  const total = DIMENSION_ORDER.length
+  const cfg = DIMENSION_CONFIGS[DIMENSION_ORDER[step]]
+  return (
+    <div style={{ padding: '14px 24px 16px', background: '#fff' }}>
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 18,
+        }}
+      >
+        <img
+          src="/assets/psy-by-psy-logo.png"
+          alt="PSY by PSY"
+          style={{ height: 84, width: 'auto', objectFit: 'contain' }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            fontSize: 11,
+            fontFamily: 'Inter',
+            color: '#959595',
+            fontWeight: 600,
+            letterSpacing: 0.5,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {String(step + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+        </div>
+      </div>
+
+      {/* segmented progress bar */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+        {DIMENSION_ORDER.map((k, i) => (
+          <div
+            key={k}
+            style={{
+              flex: 1,
+              height: 3,
+              borderRadius: 99,
+              background: i <= step ? DOT_COLOR[k] : '#EAEAEA',
+              transition: 'background .35s',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* PERMA dots */}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center' }}>
+        {DIMENSION_ORDER.map((k, i) => {
+          const isCurrent = i === step
+          const isDone = i < step
+          const color = DOT_COLOR[k]
+          return (
+            <div
+              key={k}
+              style={{
+                width: isCurrent ? 34 : 24,
+                height: isCurrent ? 34 : 24,
+                borderRadius: '50%',
+                background: isDone || isCurrent ? color : '#fff',
+                border: `1.5px solid ${isDone || isCurrent ? color : '#D8D8D8'}`,
+                color: isCurrent ? (DARK_GLYPH[k] || k === 'M' ? (k === 'M' ? '#fff' : '#151515') : '#151515') : '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'Inter',
+                fontWeight: 800,
+                fontSize: isCurrent ? 14 : 11,
+                transition: 'all .3s cubic-bezier(.2,.7,.2,1)',
+                boxShadow: isCurrent ? '0 2px 8px rgba(0,0,0,.08)' : 'none',
+              }}
+            >
+              {isDone ? (
+                <svg width="10" height="10" viewBox="0 0 10 10">
+                  <path
+                    d="M1 5 L4 8 L9 2"
+                    stroke={DARK_GLYPH[k] ? '#151515' : '#fff'}
+                    strokeWidth="2"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : (
+                k
+              )}
+            </div>
+          )
+        })}
+      </div>
+      <div
+        style={{
+          textAlign: 'center',
+          marginTop: 10,
+          fontSize: 11,
+          color: '#959595',
+          fontFamily: 'Noto Sans TC',
+          fontWeight: 500,
+        }}
+      >
+        第 {ORDINAL[step]} 題「{cfg.label}」 · 共五題
+      </div>
+    </div>
+  )
+}
+
 export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, onSubmit }: Props) {
   const [step, setStep] = useState(startAtLast ? DIMENSION_ORDER.length - 1 : 0)
   const [answers, setAnswers] = useState<NarrativeAnswers>(initialAnswers)
-  const [showHints, setShowHints] = useState(false)
+  const [showHint, setShowHint] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const key = DIMENSION_ORDER[step]
   const cfg = DIMENSION_CONFIGS[key]
+  const color = DOT_COLOR[key]
+  const darkGlyph = DARK_GLYPH[key]
   const currentText = answers[key]
   const charCount = currentText.length
   const isEnough = charCount >= MIN_CHARS
+  const remaining = Math.max(0, MIN_CHARS - charCount)
   const isLast = step === DIMENSION_ORDER.length - 1
-  const progress = (step / DIMENSION_ORDER.length) * 100
 
   useEffect(() => {
-    textareaRef.current?.focus()
-    setShowHints(false)
+    setShowHint(false)
   }, [step])
+
+  // Auto-grow textarea
+  useEffect(() => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = 'auto'
+    ta.style.height = ta.scrollHeight + 'px'
+  }, [currentText])
 
   function handleChange(val: string) {
     setAnswers((prev) => ({ ...prev, [key]: val }))
   }
 
   function goNext() {
-    if (isLast) {
-      onSubmit(answers)
-    } else {
-      setStep((s) => s + 1)
-    }
+    if (isLast) onSubmit(answers)
+    else setStep((s) => s + 1)
   }
 
   function goPrev() {
@@ -47,146 +186,274 @@ export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, o
   }
 
   return (
-    <div className="w-full max-w-lg flex flex-col gap-5">
-      {/* Progress bar */}
-      <div className="space-y-1.5">
-        <div className="flex justify-between text-xs text-slate-400">
-          <span>第 {step + 1} 題，共 {DIMENSION_ORDER.length} 題</span>
-          <span className={cfg.textColor}>{cfg.label}</span>
-        </div>
-        <div className="h-1 rounded-full bg-blue-100 overflow-hidden">
+    <div
+      key={step}
+      className="screen-enter"
+      style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', background: '#fff' }}
+    >
+      <ProgressHeader step={step} />
+
+      {/* Prompt block */}
+      <div style={{ padding: '8px 24px 14px', textAlign: 'center' }}>
+        <div
+          style={{
+            position: 'relative',
+            height: 200,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           <div
-            className={`h-full rounded-full bg-gradient-to-r ${cfg.gradientBar} transition-all duration-500`}
-            style={{ width: `${progress}%` }}
+            style={{
+              position: 'absolute',
+              width: 240,
+              height: 240,
+              borderRadius: '50%',
+              background: `radial-gradient(circle,${color}44 0%, ${color}00 70%)`,
+            }}
           />
-        </div>
-      </div>
-
-      {/* Step indicators */}
-      <div className="flex justify-center gap-2">
-        {DIMENSION_ORDER.map((k, i) => {
-          const c = DIMENSION_CONFIGS[k]
-          const isDone = i < step
-          const isCurrent = i === step
-          return (
-            <div
-              key={k}
-              className={`
-                flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all duration-300
-                ${isCurrent ? `${c.bgMed} ${c.textColor} border-2 ${c.borderSolid} scale-110` : ''}
-                ${isDone ? `${c.bgLight} ${c.textColor} border ${c.borderLight}` : ''}
-                ${!isCurrent && !isDone ? 'bg-slate-100 text-slate-400 border border-slate-200' : ''}
-              `}
-            >
-              {isDone ? '✓' : k}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Question card */}
-      <div
-        key={step}
-        className={`question-animate rounded-2xl border ${cfg.borderLight} ${cfg.bgLight} p-5 space-y-3`}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">{cfg.icon}</span>
-          <div>
-            <span className={`text-xs font-bold uppercase tracking-widest ${cfg.textColor}`}>
-              {cfg.sublabel}
-            </span>
-            <span className="text-slate-300 mx-2">·</span>
-            <span className="text-slate-500 text-xs">{cfg.label}</span>
+          <img
+            src="/assets/bagel.png"
+            alt=""
+            style={{
+              width: 200,
+              height: 200,
+              objectFit: 'contain',
+              position: 'relative',
+              zIndex: 1,
+              filter: 'drop-shadow(0 10px 20px rgba(201,148,99,.28))',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: '50%',
+              transform: 'translateX(112px)',
+              padding: '6px 12px',
+              background: color,
+              borderRadius: 99,
+              color: darkGlyph ? '#151515' : '#fff',
+              fontSize: 12,
+              fontWeight: 800,
+              fontFamily: 'Inter',
+              letterSpacing: 0.4,
+              boxShadow: '0 4px 12px rgba(0,0,0,.08)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {key} · {cfg.label}
           </div>
         </div>
 
-        <p className="text-base font-medium leading-relaxed text-slate-700">
+        <h2
+          style={{
+            margin: '14px 0 0',
+            fontSize: 28,
+            fontWeight: 800,
+            letterSpacing: -0.4,
+            lineHeight: 1.4,
+            color: '#151515',
+          }}
+        >
           {cfg.question}
-        </p>
+        </h2>
+      </div>
 
-        {/* Hints toggle */}
+      {/* hint toggle */}
+      <div style={{ padding: '0 24px 8px', display: 'flex', justifyContent: 'center' }}>
         <button
           type="button"
-          onClick={() => setShowHints((v) => !v)}
-          className={`
-            flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200
-            ${showHints
-              ? `${cfg.bgMed} ${cfg.textColor} border ${cfg.borderLight}`
-              : `bg-white/70 text-slate-500 border border-slate-200 hover:${cfg.bgLight} hover:${cfg.textColor}`
-            }
-          `}
+          onClick={() => setShowHint((s) => !s)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 14px',
+            background: showHint ? '#151515' : '#fff',
+            color: showHint ? '#fff' : '#151515',
+            border: '1.5px solid #151515',
+            borderRadius: 99,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            fontSize: 12,
+            fontWeight: 600,
+          }}
         >
-          <span>{showHints ? '▾' : '▸'}</span>
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+            <circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" strokeWidth="1.2" />
+            <path
+              d="M5.5 3 V6 M5.5 7.5 V8.2"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+            />
+          </svg>
           引導提示
         </button>
-
-        {/* Hints list */}
-        {showHints && (
-          <div className="space-y-2 pt-1">
-            {cfg.hints.map((hint, i) => (
-              <div key={i} className="flex items-start gap-2.5">
-                <span className={`text-xs font-bold mt-0.5 shrink-0 ${cfg.textColor}`}>{i + 1}.</span>
-                <p className="text-slate-600 text-sm leading-relaxed">{hint}</p>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+      {showHint && (
+        <div
+          className="pop"
+          style={{
+            margin: '0 24px 10px',
+            padding: '10px 14px',
+            background: '#FFF8EA',
+            border: '1px dashed #E8D8A8',
+            borderRadius: 12,
+            fontSize: 12,
+            lineHeight: 1.6,
+            color: '#6A4A0F',
+          }}
+        >
+          {cfg.hints.map((hint, i) => (
+            <div key={i} style={{ display: 'flex', gap: 6 }}>
+              <span style={{ flexShrink: 0 }}>{i === 0 ? '💡' : ''}</span>
+              <span>
+                {i + 1}. {hint}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* Textarea */}
-      <div className="space-y-2">
-        <textarea
-          ref={textareaRef}
-          value={currentText}
-          onChange={(e) => handleChange(e.target.value)}
-          placeholder="請在這裡輸入你的故事或感受，越詳細越好～ AI 會根據你的描述進行深度測驗分析。"
-          rows={6}
-          className={`
-            w-full rounded-xl bg-white border text-slate-700 placeholder-slate-300
-            text-sm leading-relaxed p-4 resize-none outline-none transition-all duration-200 shadow-sm
-            focus:ring-2 ${cfg.ring}
-            ${isEnough ? cfg.borderSolid : 'border-slate-200'}
-          `}
-        />
-        <div className="flex justify-between items-center px-1">
-          <span className={`text-xs ${isEnough ? cfg.textColor : 'text-slate-400'}`}>
-            {isEnough ? '✓ 字數足夠，可以繼續' : `至少需要 ${MIN_CHARS} 個字（還差 ${MIN_CHARS - charCount} 字）`}
-          </span>
-          <span className="text-xs text-slate-400 font-mono">{charCount}</span>
+      {/* Textarea — auto-grows with content */}
+      <div style={{ padding: '4px 18px 0' }}>
+        <div
+          style={{
+            position: 'relative',
+            minHeight: 140,
+            border: `1.5px solid ${isEnough ? color : '#D8D8D8'}`,
+            borderRadius: 14,
+            padding: '10px 12px 28px',
+            background: '#fff',
+            transition: 'border-color .3s',
+          }}
+        >
+          <textarea
+            ref={textareaRef}
+            value={currentText}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder="在這裡輸入你的故事或感受，越具體越好～"
+            style={{
+              width: '100%',
+              minHeight: 110,
+              height: 'auto',
+              resize: 'none',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontFamily: 'inherit',
+              fontSize: 12.5,
+              lineHeight: 1.55,
+              color: '#151515',
+              display: 'block',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: 14,
+              right: 14,
+              bottom: 8,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              pointerEvents: 'none',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 10.5,
+                color: isEnough ? color : '#959595',
+                fontWeight: 600,
+              }}
+            >
+              {isEnough
+                ? '✓ 字數已達標，可以下一題了'
+                : `至少需要 ${MIN_CHARS} 個字（還差 ${remaining} 個字）`}
+            </span>
+            <span
+              className="num"
+              style={{ fontSize: 10.5, color: isEnough ? color : '#959595', fontWeight: 600 }}
+            >
+              {charCount}/{MIN_CHARS}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* API Error */}
       {apiError && isLast && (
-        <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-rose-600 text-sm">
+        <div
+          style={{
+            margin: '12px 18px 0',
+            borderRadius: 12,
+            background: '#FDECEA',
+            border: '1px solid #F5C6BD',
+            padding: '10px 14px',
+            color: '#C0392B',
+            fontSize: 12.5,
+          }}
+        >
           ⚠️ {apiError}
         </div>
       )}
 
-      {/* Navigation */}
-      <div className="flex justify-between items-center pt-1">
+      {/* Nav buttons */}
+      <div style={{ padding: '14px 18px 24px', display: 'flex', gap: 10 }}>
         <button
           onClick={goPrev}
           disabled={step === 0}
-          className="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          style={{
+            flex: 1,
+            height: 50,
+            borderRadius: 99,
+            background: '#fff',
+            color: step === 0 ? '#BFBFBF' : '#151515',
+            border: `1.5px solid ${step === 0 ? '#EAEAEA' : '#959595'}`,
+            fontSize: 15,
+            fontWeight: 700,
+            fontFamily: 'inherit',
+            cursor: step === 0 ? 'default' : 'pointer',
+          }}
         >
-          ← 上一題
+          上一題
         </button>
-
         <button
           onClick={goNext}
           disabled={!isEnough}
-          className={`
-            px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200
-            ${isEnough
-              ? isLast
-                ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-100'
-                : `${cfg.bgLight} hover:${cfg.bgMed} ${cfg.textColor} border ${cfg.borderSolid}`
-              : 'bg-slate-100 text-slate-300 cursor-not-allowed'
-            }
-          `}
+          style={{
+            flex: 1.4,
+            height: 50,
+            borderRadius: 99,
+            background: isEnough ? '#292F56' : '#EAEAEA',
+            color: isEnough ? '#fff' : '#959595',
+            border: 'none',
+            fontSize: 15,
+            fontWeight: 700,
+            fontFamily: 'inherit',
+            cursor: isEnough ? 'pointer' : 'default',
+            transition: 'background .25s',
+            boxShadow: isEnough ? '0 8px 18px -8px rgba(41,47,86,.5)' : 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+          }}
         >
-          {isLast ? '送出並生成報告 →' : '下一題 →'}
+          {isLast ? '看結果' : '下一題'}
+          <svg width="14" height="14" viewBox="0 0 14 14">
+            <path
+              d="M2 7 H12 M8 3 L12 7 L8 11"
+              stroke={isEnough ? '#fff' : '#959595'}
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       </div>
     </div>

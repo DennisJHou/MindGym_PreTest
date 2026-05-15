@@ -1,13 +1,96 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InMind — 心理健康的 InBody | PSY by PSY</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏦</text></svg>" />
+    <title>心理健身房 InMind · 前測</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --navy: #292F56;
+        --navy-soft: #3a4172;
+        --ink: #151515;
+        --ink-2: #404040;
+        --muted: #6A6A6A;
+        --line: #959595;
+        --line-2: #BFBFBF;
+        --hairline: #EAEAEA;
+        --paper: #FAF2EA;
+        --sky: #5C95FF;
+        --sky-soft: #B9E6FF;
+        --coral: #E26D5C;
+        --coral-soft: #F5C6BD;
+        --mint: #D6FFB7;
+        --peach: #FFDDB9;
+        --bg: #ffffff;
+      }
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #e9e7e2;
+        font-family: "Noto Sans TC", "Inter", system-ui, sans-serif;
+        color: var(--ink);
+      }
+      body {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      #root {
+        width: 402px;
+        height: 874px;
+        transform-origin: center center;
+        flex-shrink: 0;
+      }
+      .num {
+        font-family: "Inter", "Noto Sans TC", sans-serif;
+        font-feature-settings: "tnum";
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .screen-enter { animation: fadeUp .42s cubic-bezier(.2,.7,.2,1) both; }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: none; }
+      }
+      .pop { animation: pop .5s cubic-bezier(.2,.9,.3,1.2) both; }
+      @keyframes pop {
+        from { opacity: 0; transform: scale(.92); }
+        to   { opacity: 1; transform: none; }
+      }
+      @keyframes spin360 { to { transform: rotate(360deg); } }
+      @keyframes pulse {
+        0%, 100% { opacity: .4; transform: scale(.9); }
+        50%       { opacity: 1; transform: scale(1); }
+      }
+      /* hide scrollbar on the inner phone scroll area but keep functionality */
+      .inmind-scroll::-webkit-scrollbar { width: 0; height: 0; }
+      .inmind-scroll { scrollbar-width: none; }
+      textarea { font-family: inherit; }
+      button  { font-family: inherit; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      function fitPhone() {
+        const root = document.getElementById('root');
+        if (!root) return;
+        const PW = 402, PH = 874, PAD = 24;
+        const scale = Math.min(1, (window.innerWidth - PAD) / PW, (window.innerHeight - PAD) / PH);
+        root.style.transform = scale < 0.999 ? `scale(${scale})` : '';
+      }
+      window.addEventListener('resize', fitPhone);
+      fitPhone();
+      setTimeout(fitPhone, 200);
+    </script>
   </body>
 </html>

@@ -6,6 +6,9 @@ FastAPI backend · POST /api/report
 import math
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import anthropic
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
