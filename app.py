@@ -70,10 +70,83 @@ class AllDimensionAnalysis(BaseModel):
     M: DimensionAnalysis
     A: DimensionAnalysis
 
+# ── Fixed celebrity pool ───────────────────────────────────────────────────────
+# Photos: /assets/celeb-<name>.jpg  (e.g. celeb-蔡康永.jpg)
+
+CELEB_POOL = [
+    {
+        "name": "蔡康永",
+        "archetype": "同理主持人",
+        "description": "作家、主持人，以深刻同理心與人際敏感度著稱，擅長傾聽與創造有溫度的對話空間。",
+        "perma_strength": "R（連結力）",
+    },
+    {
+        "name": "周杰倫",
+        "archetype": "心流創作者",
+        "description": "音樂創作人，對音樂有近乎偏執的專注與投入，多年來持續創造兼具深度與廣度的作品。",
+        "perma_strength": "E（投入力）",
+    },
+    {
+        "name": "吳寶春",
+        "archetype": "意志型匠人",
+        "description": "世界麵包冠軍，從底層出發、憑藉堅定意志與持續自我突破，成為台灣職人精神的代表。",
+        "perma_strength": "A（成就力）",
+    },
+    {
+        "name": "盧廣仲",
+        "archetype": "陽光創作者",
+        "description": "創作歌手，作品充滿生活溫度與正向能量，以真摯的生命態度感染許多人。",
+        "perma_strength": "P（情緒力）",
+    },
+    {
+        "name": "蔣勳",
+        "archetype": "美學意義家",
+        "description": "藝術家、作家，畢生探索生命美學與人文意義，引導無數人在日常中找到生命的厚度。",
+        "perma_strength": "M（意義力）",
+    },
+    {
+        "name": "陳綺貞",
+        "archetype": "內省創作者",
+        "description": "創作歌手，作品充滿深度的自我探索與意義追尋，以細膩筆觸描繪內心世界。",
+        "perma_strength": "M+E（意義力＋投入力）",
+    },
+    {
+        "name": "劉德華",
+        "archetype": "自律成就者",
+        "description": "演員、歌手，以超高自律與持續努力縱橫演藝圈四十年，正向積極的形象深入人心。",
+        "perma_strength": "A+P（成就力＋情緒力）",
+    },
+    {
+        "name": "張惠妹",
+        "archetype": "情感共鳴者",
+        "description": "歌手，以充沛情感能量與強烈舞台感染力著稱，擅長將情緒轉化為連結他人的橋樑。",
+        "perma_strength": "P+R（情緒力＋連結力）",
+    },
+    {
+        "name": "謝哲青",
+        "archetype": "旅行意義家",
+        "description": "作家、旅行者，遊歷百國後以人文視野重新詮釋生命的意義，鼓勵人們在旅途中認識自己。",
+        "perma_strength": "M+R（意義力＋連結力）",
+    },
+    {
+        "name": "吳季剛",
+        "archetype": "美學實踐者",
+        "description": "時裝設計師，以極度嚴謹的美學標準和對工藝的執著，在國際舞台上建立獨特的藝術風格。",
+        "perma_strength": "E+A（投入力＋成就力）",
+    },
+]
+
+_CELEB_LIST_FOR_PROMPT = "\n".join(
+    f"- {c['name']}（{c['archetype']}）：主要 PERMA 強項 {c['perma_strength']}"
+    for c in CELEB_POOL
+)
+
+
 class CelebMatchResponse(BaseModel):
-    name: str = Field(description="名人名字 (繁體中文)")
-    description: str = Field(description="名人的簡短描述 (繁體中文, ≤50字)")
-    reason: str = Field(description="為什麼這位名人最像你 (繁體中文, ≤100字)")
+    name: str = Field(description="從名人池中選出的名字，必須完全符合清單中的中文名字")
+    archetype: str = Field(description="該名人的類型標籤（直接使用名人池中提供的 archetype）")
+    description: str = Field(description="該名人的簡短介紹，≤50字 (繁體中文)")
+    reason: str = Field(description="為什麼這位名人的特質最像使用者，≤80字 (繁體中文)")
 
 class InMindLLMResponse(BaseModel):
     scores: PermaScores
@@ -108,13 +181,18 @@ SYSTEM_PROMPT = """你是 InMind，一位受過正向心理學訓練的 AI 心�
 
 1. **summary_sentence**：用一句話概述使用者的整體幸福體質樣態，語氣溫暖有力，20-35字
 
-2. **celeb_match**：根據使用者的 PERMA 分數模式，找出一位與其特質最相似的名人（可跨文化，如企業家、藝術家、運動員等），說明理由
+2. **celeb_match**：從以下固定名人池中，選出一位與使用者 PERMA 分數模式最相符的人。
+   **必須且只能從此清單中選擇，不可自行新增其他名人：**
+{celeb_list}
+   根據使用者分數最高的 1-2 個 PERMA 面向，選出對應強項最接近的名人。
 
 ## 輸出規則
 
 - 所有文字欄位使用**繁體中文**
 - 保持溫暖、支持性的語調，不帶批判
 - 確保所有建議都是切實可行且啟發性的"""
+
+SYSTEM_PROMPT = SYSTEM_PROMPT.format(celeb_list=_CELEB_LIST_FOR_PROMPT)
 
 # ── Helper: body type ─────────────────────────────────────────────────────────
 

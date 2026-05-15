@@ -167,6 +167,7 @@ export interface PercentileInfo {
 
 export interface CelebMatch {
   name: string
+  archetype: string
   description: string
   reason: string
 }

@@ -461,15 +461,23 @@ export default function InMindReportPage({ report, onRestart }: Props) {
       <HashHeading>與你最相似的名人是…</HashHeading>
       <section style={sectionStyle}>
         <div style={{ display: 'flex', alignItems: 'stretch', borderRadius: 12, overflow: 'hidden', border: '1px solid #DCE6FA' }}>
+          {/* Photo — filename: /assets/celeb-{name}.jpg, e.g. celeb-蔡康永.jpg */}
           <div
             style={{
               position: 'relative',
               width: 104,
               flexShrink: 0,
-              background: `url('/assets/celebrity.jpg') center/cover no-repeat, #EAEAEA`,
               minHeight: 124,
+              background: '#EAEAEA',
+              overflow: 'hidden',
             }}
           >
+            <img
+              src={`/assets/celeb-${celeb_match.name}.jpg`}
+              alt={celeb_match.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+            />
             <div
               style={{
                 position: 'absolute',
@@ -496,13 +504,14 @@ export default function InMindReportPage({ report, onRestart }: Props) {
                 fontWeight: 700,
                 letterSpacing: 0.4,
                 color: '#5C95FF',
-                marginBottom: 5,
+                marginBottom: 4,
                 textTransform: 'uppercase',
               }}
             >
-              與你最相似 · MATCH
+              類型 · {celeb_match.archetype}
             </div>
-            <div style={{ fontSize: 13.5, lineHeight: 1.75, color: '#151515' }}>{celeb_match.reason}</div>
+            <div style={{ fontSize: 12, color: '#404040', marginBottom: 6, lineHeight: 1.5 }}>{celeb_match.description}</div>
+            <div style={{ fontSize: 13, lineHeight: 1.75, color: '#151515', fontWeight: 500 }}>{celeb_match.reason}</div>
           </div>
         </div>
       </section>
