@@ -330,8 +330,31 @@ export default function InMindReportPage({ report, onRestart }: Props) {
   async function handleSave() {
     const el = pageRef.current
     if (!el) return
+
     const html2canvas = (await import('html2canvas')).default
-    const canvas = await html2canvas(el, { useCORS: true, scale: 2, backgroundColor: '#ffffff' })
+
+    // Freeze element width so flex layout renders identically inside the canvas
+    const elWidth = el.offsetWidth
+    const elHeight = el.scrollHeight
+    const prevScrollY = window.scrollY
+    window.scrollTo(0, 0)
+
+    const canvas = await html2canvas(el, {
+      useCORS: true,
+      allowTaint: true,
+      scale: 2,
+      backgroundColor: '#ffffff',
+      width: elWidth,
+      height: elHeight,
+      windowWidth: elWidth,
+      windowHeight: elHeight,
+      scrollX: 0,
+      scrollY: 0,
+      logging: false,
+    })
+
+    window.scrollTo(0, prevScrollY)
+
     const link = document.createElement('a')
     link.download = `InMind-報告-${celeb_match.name}.png`
     link.href = canvas.toDataURL('image/png')
