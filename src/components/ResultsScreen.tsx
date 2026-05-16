@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { useRef } from 'react'
 import type { InMindReport, DimensionKey } from '../types'
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
 
@@ -26,10 +27,10 @@ const PERMA: Record<DimensionKey, PermaMeta> = {
 }
 
 // ── Food type from body_type ────────────────────────────────
-const FOOD: Record<InMindReport['body_type'], { zh: string; img: string }> = {
-  D: { zh: '貝果', img: '/assets/food-bagel.png' },
-  I: { zh: '吐司', img: '/assets/food-toast.png' },
-  C: { zh: '棉花糖', img: '/assets/food-marshmallow.png' },
+const FOOD: Record<InMindReport['body_type'], { zh: string; img: string; trait: string }> = {
+  D: { zh: '貝果', img: '/assets/food-bagel.png', trait: '高核心力・低消耗' },
+  I: { zh: '吐司', img: '/assets/food-toast.png', trait: '功能正常・有成長空間' },
+  C: { zh: '棉花糖', img: '/assets/food-marshmallow.png', trait: '高內耗・需要補充能量' },
 }
 
 // ── Radar chart with big PERMA letter labels ────────────────
@@ -251,7 +252,7 @@ function DimensionCard({
                 marginBottom: 4,
               }}
             >
-              建心練習 · Try this
+              健心練習 · Try this
             </div>
             <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#151515', fontWeight: 500 }}>{action}</div>
           </div>
@@ -322,11 +323,23 @@ export default function InMindReportPage({ report, onRestart }: Props) {
   const totalCells = 12
   const filledCells = Math.round((total_score / 25) * totalCells)
   const inbodyLabel = (body_type_label || '').split(/[·•/]/)[0].trim()
+  const pageRef = useRef<HTMLDivElement>(null)
 
   const sectionStyle: CSSProperties = { padding: '0 20px 24px' }
 
+  async function handleSave() {
+    const el = pageRef.current
+    if (!el) return
+    const html2canvas = (await import('html2canvas')).default
+    const canvas = await html2canvas(el, { useCORS: true, scale: 2, backgroundColor: '#ffffff' })
+    const link = document.createElement('a')
+    link.download = `InMind-報告-${celeb_match.name}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+  }
+
   return (
-    <div className="screen-enter" style={{ paddingBottom: 48, background: '#fff' }}>
+    <div ref={pageRef} className="screen-enter" style={{ paddingBottom: 48, background: '#fff' }}>
       {/* Top mini brand */}
       <div style={{ textAlign: 'center', padding: '14px 0 0' }}>
         <img src="/assets/psy-by-psy-logo.png" alt="PSY by PSY" style={{ height: 84, width: 'auto', objectFit: 'contain' }} />
@@ -414,7 +427,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
               /25.0
             </span>
           </div>
-          <div style={{ marginTop: 4, fontSize: 11, color: '#FFDDB9', fontWeight: 700, letterSpacing: 0.2 }}>{body_type_label}</div>
+          <div style={{ marginTop: 4, fontSize: 11, color: '#FFDDB9', fontWeight: 700, letterSpacing: 0.2 }}>{food.trait}</div>
         </div>
 
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -516,8 +529,8 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         </div>
       </section>
 
-      {/* 適合你建心練習 */}
-      <HashHeading>適合你建心練習！</HashHeading>
+      {/* 適合你健心練習 */}
+      <HashHeading>適合你健心練習！</HashHeading>
       <section style={{ padding: '0 20px 8px' }}>
         <div style={{ display: 'flex', gap: 3, height: 14, margin: '2px 0 14px' }}>
           {Array.from({ length: 48 }).map((_, i) => (
@@ -543,7 +556,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
               每日微習慣 · 30 SEC
             </div>
             <div style={{ fontSize: 18, fontWeight: 800, color: '#151515', letterSpacing: -0.2 }}>
-              {DIMENSION_CONFIGS[balance.min_dim].label}・每日建心練習
+              {DIMENSION_CONFIGS[balance.min_dim].label}・每日健心練習
             </div>
           </div>
           <div style={{ padding: '14px 16px 16px' }}>
@@ -615,6 +628,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
           重新檢測
         </button>
         <button
+          onClick={handleSave}
           style={{
             flex: 1.3,
             height: 58,
