@@ -677,6 +677,31 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         </button>
       </div>
 
+      <div style={{ padding: '8px 20px 20px' }}>
+        <a
+          href="https://tally.so/r/J98r5Y"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: '16px 0',
+            background: '#151515',
+            color: '#fff',
+            borderRadius: 14,
+            textAlign: 'center',
+            fontSize: 16,
+            fontWeight: 800,
+            fontFamily: 'Noto Sans TC',
+            letterSpacing: 0.2,
+            textDecoration: 'none',
+            boxSizing: 'border-box',
+          }}
+        >
+          PSY by PSY 心裡健身房：搶先加入
+        </a>
+      </div>
+
       <div
         style={{
           textAlign: 'center',
