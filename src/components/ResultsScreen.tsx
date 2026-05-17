@@ -362,7 +362,8 @@ export default function InMindReportPage({ report, onRestart }: Props) {
   }
 
   return (
-    <div ref={pageRef} className="screen-enter" style={{ paddingBottom: 48, background: '#fff' }}>
+    <div className="screen-enter" style={{ paddingBottom: 48, background: '#fff' }}>
+    <div ref={pageRef} style={{ background: '#fff' }}>
       {/* Top mini brand */}
       <div style={{ textAlign: 'center', padding: '14px 0 0' }}>
         <img src="/assets/psy-by-psy-logo.png" alt="PSY by PSY" style={{ height: 84, width: 'auto', objectFit: 'contain' }} />
@@ -551,6 +552,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
           </div>
         </div>
       </section>
+      </div>{/* end of pageRef capture area */}
 
       {/* 適合你健心練習 */}
       <HashHeading>適合你健心練習！</HashHeading>
