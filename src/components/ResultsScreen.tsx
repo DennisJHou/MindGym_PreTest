@@ -33,6 +33,34 @@ const FOOD: Record<InMindReport['body_type'], { zh: string; img: string; trait: 
   C: { zh: '棉花糖', img: '/assets/food-marshmallow.png', trait: '高內耗・需要補充能量' },
 }
 
+// ── 心理健身房會員菜單 ──────────────────────────────────────
+const GYM_MENU: { icon: string; tag: string | null; title: string; body: string }[] = [
+  {
+    icon: '📋',
+    tag: null,
+    title: '專屬健心訓練菜單',
+    body: '拒絕心靈雞湯！為你量身打造經科學驗證的心理學每日訓練，讓心理健康進步肉眼可見。',
+  },
+  {
+    icon: '🤝',
+    tag: '社群',
+    title: '不孤單的團練夥伴',
+    body: '一群人走得更遠。在這裡，你將與夥伴一同鍛鍊心理肌肉，從彼此的生命歷程中汲取力量。',
+  },
+  {
+    icon: '🕯️',
+    tag: '真實',
+    title: '卸下防備的脆弱安全區',
+    body: '這裡沒有完美的包裝，只有最真實的故事與體驗。看見他人的脆弱，也點亮你接納自己的勇氣。',
+  },
+  {
+    icon: '🧰',
+    tag: '生活',
+    title: '隨手可用的百寶箱',
+    body: '把心理學帶入日常！提供隨時隨地都能上手的小工具，在每個緊繃的時刻為你即時減壓。',
+  },
+]
+
 // ── Radar chart with big PERMA letter labels ────────────────
 function RadarChart({ scores, max = 5 }: { scores: InMindReport['scores']; max?: number }) {
   const cx = 160
@@ -327,39 +355,40 @@ export default function InMindReportPage({ report, onRestart }: Props) {
 
   const sectionStyle: CSSProperties = { padding: '0 20px 24px' }
 
-  async function handleSave() {
-    const el = pageRef.current
-    if (!el) return
-
-    const html2canvas = (await import('html2canvas')).default
-
-    // Freeze element width so flex layout renders identically inside the canvas
-    const elWidth = el.offsetWidth
-    const elHeight = el.scrollHeight
-    const prevScrollY = window.scrollY
-    window.scrollTo(0, 0)
-
-    const canvas = await html2canvas(el, {
-      useCORS: true,
-      allowTaint: true,
-      scale: 2,
-      backgroundColor: '#ffffff',
-      width: elWidth,
-      height: elHeight,
-      windowWidth: elWidth,
-      windowHeight: elHeight,
-      scrollX: 0,
-      scrollY: 0,
-      logging: false,
-    })
-
-    window.scrollTo(0, prevScrollY)
-
-    const link = document.createElement('a')
-    link.download = `InMind-報告-${celeb_match.name}.png`
-    link.href = canvas.toDataURL('image/png')
-    link.click()
-  }
+  // 儲存報告功能暫時停用（按鈕隱藏中），避免跑版問題
+  // async function handleSave() {
+  //   const el = pageRef.current
+  //   if (!el) return
+  //
+  //   const html2canvas = (await import('html2canvas')).default
+  //
+  //   // Freeze element width so flex layout renders identically inside the canvas
+  //   const elWidth = el.offsetWidth
+  //   const elHeight = el.scrollHeight
+  //   const prevScrollY = window.scrollY
+  //   window.scrollTo(0, 0)
+  //
+  //   const canvas = await html2canvas(el, {
+  //     useCORS: true,
+  //     allowTaint: true,
+  //     scale: 2,
+  //     backgroundColor: '#ffffff',
+  //     width: elWidth,
+  //     height: elHeight,
+  //     windowWidth: elWidth,
+  //     windowHeight: elHeight,
+  //     scrollX: 0,
+  //     scrollY: 0,
+  //     logging: false,
+  //   })
+  //
+  //   window.scrollTo(0, prevScrollY)
+  //
+  //   const link = document.createElement('a')
+  //   link.download = `InMind-報告-${celeb_match.name}.png`
+  //   link.href = canvas.toDataURL('image/png')
+  //   link.click()
+  // }
 
   return (
     <div className="screen-enter" style={{ paddingBottom: 48, background: '#fff' }}>
@@ -678,30 +707,135 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         </button> */}
       </div>
 
-      <div style={{ padding: '8px 20px 20px' }}>
-        <a
-          href="https://tally.so/r/J98r5Y"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'block',
-            width: '100%',
-            padding: '16px 0',
-            background: '#151515',
-            color: '#fff',
-            borderRadius: 14,
-            textAlign: 'center',
-            fontSize: 16,
-            fontWeight: 800,
-            fontFamily: 'Noto Sans TC',
-            letterSpacing: 0.2,
-            textDecoration: 'none',
-            boxSizing: 'border-box',
-          }}
-        >
-          PSY by PSY 心裡健身房：搶先加入
-        </a>
-      </div>
+      {/* ── 心理健身房介紹 ───────────────────────────── */}
+      <section style={{ padding: '4px 16px 8px' }}>
+        <div style={{ background: '#292F56', borderRadius: 18, padding: '26px 20px 22px' }}>
+          {/* 開幕標籤 */}
+          <div
+            style={{
+              display: 'inline-block',
+              padding: '4px 10px',
+              borderRadius: 6,
+              background: '#E26D5C',
+              fontSize: 10.5,
+              fontFamily: 'Inter',
+              fontWeight: 800,
+              letterSpacing: 1,
+              color: '#fff',
+              textTransform: 'uppercase',
+              marginBottom: 14,
+            }}
+          >
+            Grand Opening
+          </div>
+
+          {/* 主標題 */}
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 25,
+              fontWeight: 800,
+              lineHeight: 1.4,
+              letterSpacing: -0.3,
+              color: '#fff',
+              fontFamily: 'Noto Sans TC',
+            }}
+          >
+            <span style={{ fontFamily: 'Inter', letterSpacing: -0.5 }}>PSY by PSY</span>
+            <br />
+            心理健身房開幕了<span style={{ color: '#E26D5C' }}>！</span>
+          </h2>
+          <div style={{ fontSize: 14.5, fontWeight: 700, color: '#B9E6FF', marginTop: 10, lineHeight: 1.6 }}>
+            關於你心理肌肉的一切，全面解鎖。
+          </div>
+
+          {/* 副標題 */}
+          <p style={{ margin: '16px 0 0', fontSize: 13.5, lineHeight: 1.9, color: 'rgba(255,255,255,.78)' }}>
+            你已經看完了免費報告！但就像身體一樣，心也需要天天鍛鍊，才不會「掉肌肉」。接下來，我們將一步步引領你，根據科學化的心理學菜單進行練習，並在第一時間為你精準推送。
+          </p>
+
+          {/* 像素點點分隔 */}
+          <div style={{ display: 'flex', gap: 3, height: 8, margin: '20px 0' }}>
+            {Array.from({ length: 40 }).map((_, i) => (
+              <div key={i} style={{ flex: 1, background: 'rgba(214,255,183,.5)', borderRadius: 1 }} />
+            ))}
+          </div>
+
+          {/* 心理健身菜單 */}
+          <div style={{ fontSize: 19, fontWeight: 800, color: '#fff', letterSpacing: -0.2, fontFamily: 'Noto Sans TC' }}>
+            <span style={{ color: '#E26D5C' }}>＃</span> 心理健身菜單
+          </div>
+          <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.7)', margin: '6px 0 14px' }}>
+            加入「心理健身房」會員，你將獲得：
+          </div>
+
+          {/* 菜單卡片 */}
+          {GYM_MENU.map((m) => (
+            <div
+              key={m.title}
+              style={{
+                background: '#fff',
+                borderRadius: 12,
+                padding: '13px 14px',
+                marginBottom: 9,
+                display: 'flex',
+                gap: 11,
+                alignItems: 'flex-start',
+              }}
+            >
+              <div style={{ fontSize: 21, flexShrink: 0, lineHeight: 1.3 }}>{m.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+                  {m.tag && (
+                    <span
+                      style={{
+                        padding: '2px 7px',
+                        borderRadius: 5,
+                        background: 'rgba(226,109,92,.14)',
+                        color: '#E26D5C',
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        letterSpacing: 0.4,
+                      }}
+                    >
+                      {m.tag}
+                    </span>
+                  )}
+                  <span style={{ fontSize: 14, fontWeight: 800, color: '#151515', letterSpacing: -0.2 }}>{m.title}</span>
+                </div>
+                <div style={{ fontSize: 12.5, lineHeight: 1.7, color: '#404040' }}>{m.body}</div>
+              </div>
+            </div>
+          ))}
+
+          {/* 搶先加入按鈕 */}
+          <a
+            href="https://tally.so/r/J98r5Y"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              width: '100%',
+              marginTop: 14,
+              padding: '16px 0',
+              background: '#E26D5C',
+              color: '#fff',
+              borderRadius: 14,
+              fontSize: 16,
+              fontWeight: 800,
+              fontFamily: 'Noto Sans TC',
+              letterSpacing: 0.2,
+              textDecoration: 'none',
+              boxSizing: 'border-box',
+            }}
+          >
+            PSY by PSY 心理健身房 搶先加入 →
+          </a>
+        </div>
+      </section>
 
       <div
         style={{
