@@ -652,7 +652,8 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         >
           重新檢測
         </button>
-        <button
+        {/* 儲存報告按鈕暫時隱藏，避免跑版問題 */}
+        {/* <button
           onClick={handleSave}
           style={{
             flex: 1.3,
@@ -674,11 +675,10 @@ export default function InMindReportPage({ report, onRestart }: Props) {
           }}
         >
           儲存報告 →
-        </button>
+        </button> */}
       </div>
 
-      {/* PSY by PSY 搶先加入按鈕暫時隱藏，避免儲存報告時跑版 */}
-      {/* <div style={{ padding: '8px 20px 20px' }}>
+      <div style={{ padding: '8px 20px 20px' }}>
         <a
           href="https://tally.so/r/J98r5Y"
           target="_blank"
@@ -701,7 +701,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         >
           PSY by PSY 心裡健身房：搶先加入
         </a>
-      </div> */}
+      </div>
 
       <div
         style={{
