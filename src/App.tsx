@@ -108,12 +108,12 @@ function LoadingScreen() {
 
 export default function App() {
   const [screen, setScreen]   = useState<AppScreen>('landing')
-  const [answers, setAnswers] = useState<NarrativeAnswers>({ P: '', E: '', R: '', M: '', A: '' })
+  const [answers, setAnswers] = useState<NarrativeAnswers>({ P: '', E: '', R: '', M: '', A: '', email: '' })
   const [report,  setReport]  = useState<InMindReport | null>(null)
   const [apiError, setApiError] = useState<string>('')
 
   function handleStart() {
-    setAnswers({ P: '', E: '', R: '', M: '', A: '' })
+    setAnswers({ P: '', E: '', R: '', M: '', A: '', email: '' })
     setApiError('')
     setScreen('quiz')
   }
@@ -148,7 +148,7 @@ export default function App() {
 
   function handleRestart() {
     setReport(null)
-    setAnswers({ P: '', E: '', R: '', M: '', A: '' })
+    setAnswers({ P: '', E: '', R: '', M: '', A: '', email: '' })
     setApiError('')
     setScreen('landing')
   }

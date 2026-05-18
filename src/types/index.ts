@@ -135,6 +135,7 @@ export interface NarrativeAnswers {
   R: string
   M: string
   A: string
+  email: string
 }
 
 export interface PermaScores {

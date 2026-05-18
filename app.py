@@ -48,6 +48,7 @@ class NarrativeAnswers(BaseModel):
     R: str = Field(description="Relationships narrative")
     M: str = Field(description="Meaning narrative")
     A: str = Field(description="Accomplishment narrative")
+    email: str = Field(description="User email address")
 
 # ── LLM output schema ─────────────────────────────────────────────────────────
 
@@ -454,6 +455,7 @@ async def generate_report(answers: NarrativeAnswers):
         # Save to Supabase
         supabase_record = {
             "user_responses": answers.model_dump(),
+            "email": answers.email,
             "score_p": scores_dict.get("P", 0),
             "score_e": scores_dict.get("E", 0),
             "score_r": scores_dict.get("R", 0),
