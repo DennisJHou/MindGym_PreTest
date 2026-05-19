@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { DimensionKey, NarrativeAnswers } from '../types'
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
+import VoiceInput from './VoiceInput'
 
 interface Props {
   initialAnswers: NarrativeAnswers
@@ -175,6 +176,16 @@ export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, o
     ta.style.height = 'auto'
     ta.style.height = ta.scrollHeight + 'px'
   }, [currentText])
+
+  // Append recognised speech to the current answer (never overwrite),
+  // so the user can dictate in several passes or mix typing and voice.
+  function appendTranscript(text: string) {
+    setAnswers((prev) => {
+      const cur = prev[key]
+      const sep = cur && !/\s$/.test(cur) ? ' ' : ''
+      return { ...prev, [key]: cur + sep + text }
+    })
+  }
 
   function goNext() {
     if (isLast) onSubmit(answers)
@@ -375,6 +386,11 @@ export default function NarrativeQuiz({ initialAnswers, startAtLast, apiError, o
               {charCount}/{MIN_CHARS}
             </span>
           </div>
+        </div>
+
+        {/* Voice input — optional, appends to the textarea above */}
+        <div style={{ marginTop: 10 }}>
+          <VoiceInput accent={color} onTranscript={appendTranscript} />
         </div>
       </div>
 

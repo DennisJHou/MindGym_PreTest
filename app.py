@@ -3,6 +3,7 @@ InMind — 心理健康的 InBody
 FastAPI backend · POST /api/report
 """
 
+import io
 import math
 import os
 
@@ -10,10 +11,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import anthropic
-from fastapi import FastAPI
+import openai
+from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from openai import OpenAI
 from pydantic import BaseModel, Field
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from supabase import create_client, Client
 
 app = FastAPI(title="InMind API")
@@ -31,6 +37,36 @@ app.add_middleware(
 )
 
 client = anthropic.Anthropic()
+
+# OpenAI client for Whisper speech-to-text. Guarded so the app still boots
+# if OPENAI_API_KEY is not yet configured.
+openai_client = None
+try:
+    openai_client = OpenAI()
+except Exception as e:
+    print(f"Warning: OpenAI initialization failed: {e}")
+
+# ── Rate limiting ─────────────────────────────────────────────────────────────
+# Per-IP limiter so the (paid) Whisper endpoint can't be hammered by a single
+# client. X-Forwarded-For is read first so limiting works behind the deploy
+# proxy; falls back to the socket address in local dev.
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return get_remote_address(request)
+
+limiter = Limiter(key_func=_client_ip)
+app.state.limiter = limiter
+
+def _rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"error": "語音辨識使用過於頻繁，請稍後再試"},
+    )
+
+app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://wnkpndbkzunkjqkcsmae.supabase.co")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_KOs4bePZ_UJbmoChdG904Q_KlBYvgOe")
@@ -491,6 +527,73 @@ async def generate_report(answers: NarrativeAnswers):
     except Exception as e:
         return JSONResponse(
             content={"error": f"分析失敗：{str(e)}"},
+            status_code=500,
+        )
+
+# ── Route: speech-to-text ─────────────────────────────────────────────────────
+
+# This endpoint is strictly a voice-input helper for the questionnaire — not a
+# general transcription service. The size cap is set well below Whisper's
+# 25 MB limit, and only audio content types are accepted, so it can't be
+# repurposed for long-form / arbitrary-file transcription.
+_MAX_AUDIO_BYTES = 10 * 1024 * 1024
+_ALLOWED_AUDIO_TYPES = {
+    "audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg",
+    "audio/wav", "audio/x-wav", "audio/m4a", "audio/x-m4a",
+}
+
+@app.post("/api/transcribe")
+@limiter.limit("5/minute;50/day")
+async def transcribe(request: Request, audio: UploadFile = File(...)):
+    if openai_client is None:
+        return JSONResponse(
+            content={"error": "語音辨識服務未啟用，請設定 OPENAI_API_KEY"},
+            status_code=503,
+        )
+
+    # Reject anything that isn't recognisably an audio upload.
+    content_type = (audio.content_type or "").split(";")[0].strip().lower()
+    if content_type and content_type not in _ALLOWED_AUDIO_TYPES:
+        return JSONResponse(
+            content={"error": "不支援的檔案格式，此功能僅接受語音錄音"},
+            status_code=415,
+        )
+
+    data = await audio.read()
+    if len(data) == 0:
+        return JSONResponse(content={"error": "音訊檔案為空，請重新錄音"}, status_code=400)
+    if len(data) > _MAX_AUDIO_BYTES:
+        return JSONResponse(
+            content={"error": "錄音過長（上限約 10MB），請縮短錄音時間"},
+            status_code=400,
+        )
+
+    buf = io.BytesIO(data)
+    buf.name = audio.filename or "recording.webm"
+
+    try:
+        result = openai_client.audio.transcriptions.create(
+            model="whisper-1",
+            file=buf,
+            language="zh",
+            # Biases Whisper toward Traditional Chinese output (it otherwise
+            # tends to return Simplified Chinese for zh).
+            prompt="以下是繁體中文的內容。",
+        )
+        return {"text": (result.text or "").strip()}
+    except openai.AuthenticationError:
+        return JSONResponse(
+            content={"error": "OpenAI 金鑰無效，請檢查 OPENAI_API_KEY 環境變數"},
+            status_code=401,
+        )
+    except openai.RateLimitError:
+        return JSONResponse(
+            content={"error": "語音辨識請求過於頻繁，請稍後再試"},
+            status_code=429,
+        )
+    except Exception as e:
+        return JSONResponse(
+            content={"error": f"語音辨識失敗：{str(e)}"},
             status_code=500,
         )
 
