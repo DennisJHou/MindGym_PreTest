@@ -777,27 +777,34 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         <RoadmapRow when="第 1 個月" body={take_action.after_1_month} dot="#5C95FF" last />
       </section>
 
-      {/* Footer CTA */}
-      <div style={{ padding: '18px 20px 18px', display: 'flex', gap: 10 }}>
-        <button
-          onClick={onRestart}
+      {/* ── 加入心理健身房 CTA ───────────────────────── */}
+      <section style={{ padding: '4px 16px 8px' }}>
+        <a
+          href="https://tally.so/r/J98r5Y"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
-            flex: 1,
-            height: 58,
-            borderRadius: 99,
-            background: '#fff',
-            color: '#151515',
-            border: '1.5px solid #959595',
-            fontSize: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            width: '100%',
+            padding: '18px 0',
+            background: '#E26D5C',
+            color: '#fff',
+            borderRadius: 14,
+            fontSize: 17,
             fontWeight: 800,
-            fontFamily: 'inherit',
-            cursor: 'pointer',
-            letterSpacing: 0.4,
+            fontFamily: 'Noto Sans TC',
+            letterSpacing: 0.2,
+            textDecoration: 'none',
+            boxSizing: 'border-box',
+            boxShadow: '0 8px 24px -8px rgba(226,109,92,.55)',
           }}
         >
-          重新檢測
-        </button>
-      </div>
+          PSY by PSY 心理健身房 搶先加入 →
+        </a>
+      </section>
 
       {/* ── 心理健身房介紹 ───────────────────────────── */}
       <section style={{ padding: '4px 16px 8px' }}>
@@ -900,34 +907,30 @@ export default function InMindReportPage({ report, onRestart }: Props) {
             </div>
           ))}
 
-          {/* 搶先加入按鈕 */}
-          <a
-            href="https://tally.so/r/J98r5Y"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              width: '100%',
-              marginTop: 14,
-              padding: '16px 0',
-              background: '#E26D5C',
-              color: '#fff',
-              borderRadius: 14,
-              fontSize: 16,
-              fontWeight: 800,
-              fontFamily: 'Noto Sans TC',
-              letterSpacing: 0.2,
-              textDecoration: 'none',
-              boxSizing: 'border-box',
-            }}
-          >
-            PSY by PSY 心理健身房 搶先加入 →
-          </a>
         </div>
       </section>
+
+      {/* ── 重新檢測（縮小版）───────────────────────── */}
+      <div style={{ padding: '8px 20px 16px', textAlign: 'center' }}>
+        <button
+          onClick={onRestart}
+          style={{
+            height: 44,
+            padding: '0 28px',
+            borderRadius: 99,
+            background: 'transparent',
+            color: '#959595',
+            border: '1px solid #D4D4D4',
+            fontSize: 13,
+            fontWeight: 700,
+            fontFamily: 'inherit',
+            cursor: 'pointer',
+            letterSpacing: 0.3,
+          }}
+        >
+          重新檢測
+        </button>
+      </div>
 
       <div
         style={{
