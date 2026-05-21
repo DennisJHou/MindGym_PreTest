@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { InMindReport, DimensionKey } from '../types'
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
 
@@ -352,43 +352,117 @@ export default function InMindReportPage({ report, onRestart }: Props) {
   const filledCells = Math.round((total_score / 25) * totalCells)
   const inbodyLabel = (body_type_label || '').split(/[·•/]/)[0].trim()
   const pageRef = useRef<HTMLDivElement>(null)
+  const [sharing, setSharing] = useState(false)
 
   const sectionStyle: CSSProperties = { padding: '0 20px 24px' }
 
-  // 儲存報告功能暫時停用（按鈕隱藏中），避免跑版問題
-  // async function handleSave() {
-  //   const el = pageRef.current
-  //   if (!el) return
-  //
-  //   const html2canvas = (await import('html2canvas')).default
-  //
-  //   // Freeze element width so flex layout renders identically inside the canvas
-  //   const elWidth = el.offsetWidth
-  //   const elHeight = el.scrollHeight
-  //   const prevScrollY = window.scrollY
-  //   window.scrollTo(0, 0)
-  //
-  //   const canvas = await html2canvas(el, {
-  //     useCORS: true,
-  //     allowTaint: true,
-  //     scale: 2,
-  //     backgroundColor: '#ffffff',
-  //     width: elWidth,
-  //     height: elHeight,
-  //     windowWidth: elWidth,
-  //     windowHeight: elHeight,
-  //     scrollX: 0,
-  //     scrollY: 0,
-  //     logging: false,
-  //   })
-  //
-  //   window.scrollTo(0, prevScrollY)
-  //
-  //   const link = document.createElement('a')
-  //   link.download = `InMind-報告-${celeb_match.name}.png`
-  //   link.href = canvas.toDataURL('image/png')
-  //   link.click()
-  // }
+  async function handleShare() {
+    const el = pageRef.current
+    if (!el || sharing) return
+    setSharing(true)
+
+    try {
+      const html2canvas = (await import('html2canvas')).default
+
+      const elWidth = el.offsetWidth
+      const elHeight = el.scrollHeight
+      const prevScrollY = window.scrollY
+      window.scrollTo(0, 0)
+
+      const sourceCanvas = await html2canvas(el, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 2,
+        backgroundColor: '#ffffff',
+        width: elWidth,
+        height: elHeight,
+        windowWidth: elWidth,
+        windowHeight: elHeight,
+        scrollX: 0,
+        scrollY: 0,
+        logging: false,
+      })
+
+      window.scrollTo(0, prevScrollY)
+
+      // Compose onto a 9:16 canvas with a reserved bottom band for the InMind footer.
+      const TARGET_RATIO = 9 / 16
+      const sW = sourceCanvas.width
+      const sH = sourceCanvas.height
+      const FOOTER_RESERVE = 200
+      const minH = sH + FOOTER_RESERVE
+      const widthDrivenH = Math.ceil(sW / TARGET_RATIO)
+      const finalH = Math.max(minH, widthDrivenH)
+      const finalW = Math.max(sW, Math.ceil(finalH * TARGET_RATIO))
+      const dx = Math.round((finalW - sW) / 2)
+      const dy = 0
+
+      const finalCanvas = document.createElement('canvas')
+      finalCanvas.width = finalW
+      finalCanvas.height = finalH
+      const ctx = finalCanvas.getContext('2d')!
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, finalW, finalH)
+      ctx.drawImage(sourceCanvas, dx, dy)
+
+      // Brand footer in the bottom band
+      const footerCenterX = finalW / 2
+      const footerCenterY = sH + (finalH - sH) / 2
+      const fontFamily = 'Inter, "Noto Sans TC", system-ui, sans-serif'
+
+      ctx.textBaseline = 'middle'
+      ctx.font = `800 86px ${fontFamily}`
+      const inmind = 'InMind'
+      const dot = '.'
+      const wInmind = ctx.measureText(inmind).width
+      const wDot = ctx.measureText(dot).width
+      const startX = footerCenterX - (wInmind + wDot) / 2
+      ctx.textAlign = 'left'
+      ctx.fillStyle = '#151515'
+      ctx.fillText(inmind, startX, footerCenterY - 16)
+      ctx.fillStyle = '#E26D5C'
+      ctx.fillText(dot, startX + wInmind, footerCenterY - 16)
+
+      ctx.textAlign = 'center'
+      ctx.font = `700 26px "Noto Sans TC", ${fontFamily}`
+      ctx.fillStyle = '#959595'
+      ctx.fillText('心理健康的 InBody · 立即測測你的', footerCenterX, footerCenterY + 48)
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        finalCanvas.toBlob((b) => resolve(b), 'image/png'),
+      )
+      if (!blob) return
+
+      const filename = `InMind-報告-${celeb_match.name}.png`
+      const file = new File([blob], filename, { type: 'image/png' })
+
+      const nav = navigator as Navigator & {
+        canShare?: (data: ShareData) => boolean
+        share?: (data: ShareData) => Promise<void>
+      }
+      if (nav.canShare && nav.share && nav.canShare({ files: [file] })) {
+        try {
+          await nav.share({
+            files: [file],
+            title: 'InMind 心理健身報告',
+            text: `我的心理體型是＃${celeb_match.name}型！來測測你的吧。`,
+          })
+          return
+        } catch (err) {
+          if ((err as DOMException | undefined)?.name === 'AbortError') return
+        }
+      }
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      link.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setSharing(false)
+    }
+  }
 
   return (
     <div className="screen-enter" style={{ paddingBottom: 48, background: '#fff' }}>
@@ -583,6 +657,48 @@ export default function InMindReportPage({ report, onRestart }: Props) {
       </section>
       </div>{/* end of pageRef capture area */}
 
+      {/* 分享報告 */}
+      <section style={{ padding: '6px 20px 14px' }}>
+        <button
+          onClick={handleShare}
+          disabled={sharing}
+          style={{
+            width: '100%',
+            height: 56,
+            borderRadius: 99,
+            background: sharing ? '#5A6280' : '#292F56',
+            color: '#fff',
+            border: 'none',
+            fontSize: 15.5,
+            fontWeight: 800,
+            fontFamily: 'inherit',
+            cursor: sharing ? 'default' : 'pointer',
+            letterSpacing: 0.4,
+            boxShadow: '0 8px 20px -8px rgba(41,47,86,.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          {sharing ? (
+            <>產生分享圖中…</>
+          ) : (
+            <>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v13" />
+                <path d="M7 8l5-5 5 5" />
+                <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+              </svg>
+              分享我的報告
+            </>
+          )}
+        </button>
+        <div style={{ marginTop: 8, fontSize: 12, color: '#959595', textAlign: 'center', lineHeight: 1.55 }}>
+          將以圖片形式分享：可存到相簿、傳到 LINE 或其他 App
+        </div>
+      </section>
+
       {/* 適合你健心練習 */}
       <HashHeading>適合你健心練習！</HashHeading>
       <section style={{ padding: '0 20px 8px' }}>
@@ -681,30 +797,6 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         >
           重新檢測
         </button>
-        {/* 儲存報告按鈕暫時隱藏，避免跑版問題 */}
-        {/* <button
-          onClick={handleSave}
-          style={{
-            flex: 1.3,
-            height: 58,
-            borderRadius: 99,
-            background: '#292F56',
-            color: '#fff',
-            border: 'none',
-            fontSize: 16,
-            fontWeight: 800,
-            fontFamily: 'inherit',
-            cursor: 'pointer',
-            letterSpacing: 0.4,
-            boxShadow: '0 8px 20px -8px rgba(41,47,86,.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-          }}
-        >
-          儲存報告 →
-        </button> */}
       </div>
 
       {/* ── 心理健身房介紹 ───────────────────────────── */}
