@@ -385,16 +385,14 @@ export default function InMindReportPage({ report, onRestart }: Props) {
 
       window.scrollTo(0, prevScrollY)
 
-      // Compose onto a 9:16 canvas with a reserved bottom band for the InMind footer.
+      // Keep source width; only extend height if needed to fit footer / reach 9:16.
       const TARGET_RATIO = 9 / 16
       const sW = sourceCanvas.width
       const sH = sourceCanvas.height
       const FOOTER_RESERVE = 200
-      const minH = sH + FOOTER_RESERVE
-      const widthDrivenH = Math.ceil(sW / TARGET_RATIO)
-      const finalH = Math.max(minH, widthDrivenH)
-      const finalW = Math.max(sW, Math.ceil(finalH * TARGET_RATIO))
-      const dx = Math.round((finalW - sW) / 2)
+      const finalW = sW
+      const finalH = Math.max(sH + FOOTER_RESERVE, Math.ceil(sW / TARGET_RATIO))
+      const dx = 0
       const dy = 0
 
       const finalCanvas = document.createElement('canvas')

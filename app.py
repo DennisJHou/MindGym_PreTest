@@ -585,11 +585,15 @@ async def transcribe(audio: UploadFile = File(...)):
             content={"error": "OpenAI 金鑰無效，請檢查 OPENAI_API_KEY 環境變數"},
             status_code=401,
         )
-    except openai.RateLimitError:
-        return JSONResponse(
-            content={"error": "語音辨識請求過於頻繁，請稍後再試"},
-            status_code=429,
-        )
+    except openai.RateLimitError as exc:
+        # 429 有兩種原因：速率超標 vs. 帳戶配額/餘額用盡
+        body = getattr(exc, "body", {}) or {}
+        code = (body.get("error") or {}).get("code", "") if isinstance(body, dict) else ""
+        if "quota" in str(code).lower() or "quota" in str(exc).lower():
+            msg = "語音辨識配額已用盡，請確認 OpenAI 帳戶餘額後再試"
+        else:
+            msg = "語音辨識請求過於頻繁，請稍後幾秒再試"
+        return JSONResponse(content={"error": msg}, status_code=429)
     except Exception as e:
         return JSONResponse(
             content={"error": f"語音辨識失敗：{str(e)}"},
