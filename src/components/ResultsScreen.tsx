@@ -89,7 +89,7 @@ function RadarChart({ scores, max = 5 }: { scores: InMindReport['scores']; max?:
   }
 
   return (
-    <svg viewBox="0 0 320 320" width="100%" height="100%" style={{ display: 'block', overflow: 'visible' }}>
+    <svg data-share-radar viewBox="0 0 320 320" width="100%" height="100%" style={{ display: 'block', overflow: 'visible' }}>
       {rings.map((r, ri) => (
         <polygon
           key={ri}
@@ -381,6 +381,80 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         scrollX: 0,
         scrollY: 0,
         logging: false,
+        onclone: (clonedDoc, clonedEl) => {
+          // All adjustments below apply ONLY to the cloned DOM used by
+          // html2canvas — the live page rendering is unchanged.
+
+          // Fix 1: Title — give the H1 more line-height + push the subtitle
+          // farther down so they don't collide after canvas font fallback.
+          const h1 = clonedEl.querySelector('[data-share-h1]') as HTMLElement | null
+          if (h1) {
+            h1.style.lineHeight = '1.05'
+            h1.style.paddingBottom = '4px'
+          }
+          const subtitle = clonedEl.querySelector('[data-share-subtitle]') as HTMLElement | null
+          if (subtitle) subtitle.style.marginTop = '14px'
+
+          // Fix 2: Blue Toast card — html2canvas mishandles `inline-block`
+          // flex items with `align-self`, which collapses the capsule onto
+          // the hashtag above. Flatten the card to block flow + wrap the
+          // capsule in a normal block parent.
+          const blueCard = clonedEl.querySelector('[data-share-bluecard]') as HTMLElement | null
+          if (blueCard) {
+            blueCard.style.display = 'block'
+            blueCard.style.flexDirection = ''
+          }
+          const capsule = clonedEl.querySelector('[data-share-capsule]') as HTMLElement | null
+          if (capsule && capsule.parentNode) {
+            const wrap = clonedDoc.createElement('div')
+            wrap.style.marginTop = '6px'
+            capsule.style.marginTop = '0'
+            capsule.style.alignSelf = ''
+            capsule.parentNode.insertBefore(wrap, capsule)
+            wrap.appendChild(capsule)
+
+            // Also trim the InBody label to just the body-type name
+            // (drop anything after a separator: `・ · • / 空白`).
+            const trimmedLabel = (body_type_label || '').split(/[·•・/\s]/)[0].trim()
+            capsule.textContent = `InBody對應：${trimmedLabel}`
+          }
+
+          // Fix 3: Radar chart — extend the SVG viewBox upward so the P
+          // label (above y=0) isn't cropped by html2canvas.
+          const radar = clonedEl.querySelector('[data-share-radar]') as SVGSVGElement | null
+          if (radar) radar.setAttribute('viewBox', '0 -20 320 340')
+
+          // Fix 4a: Food image — html2canvas 1.4.1 doesn't honor
+          // `object-fit: contain`, so the image stretches. Switch to
+          // max-width/max-height + auto sizing which preserves ratio.
+          const foodImg = clonedEl.querySelector('[data-share-food-img]') as HTMLImageElement | null
+          if (foodImg) {
+            foodImg.style.width = 'auto'
+            foodImg.style.height = 'auto'
+            foodImg.style.maxWidth = '100%'
+            foodImg.style.maxHeight = '90px'
+            foodImg.style.objectFit = ''
+            foodImg.style.display = 'block'
+            const foodParent = foodImg.parentElement
+            if (foodParent) foodParent.style.overflow = 'hidden'
+          }
+
+          // Fix 4b: Celebrity portrait — `object-fit: cover` likewise
+          // distorts in html2canvas. Replace the <img> with a
+          // background-image on the container, which html2canvas renders
+          // with the correct cover behavior.
+          const celebContainer = clonedEl.querySelector('[data-share-celeb-container]') as HTMLElement | null
+          if (celebContainer) {
+            const celebImg = celebContainer.querySelector('img')
+            if (celebImg) {
+              celebContainer.style.backgroundImage = `url(${celebImg.src})`
+              celebContainer.style.backgroundSize = 'cover'
+              celebContainer.style.backgroundPosition = 'center'
+              celebContainer.style.backgroundRepeat = 'no-repeat'
+              celebImg.style.display = 'none'
+            }
+          }
+        },
       })
 
       window.scrollTo(0, prevScrollY)
@@ -473,6 +547,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
       {/* HUGE InMind hero */}
       <div style={{ padding: '2px 16px 0' }}>
         <h1
+          data-share-h1
           style={{
             margin: 0,
             fontFamily: 'Inter',
@@ -485,7 +560,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         >
           InMind<span style={{ color: '#E26D5C' }}>.</span>
         </h1>
-        <div style={{ fontSize: 14, color: '#959595', marginTop: 8, fontWeight: 600, letterSpacing: 0.2 }}>
+        <div data-share-subtitle style={{ fontSize: 14, color: '#959595', marginTop: 8, fontWeight: 600, letterSpacing: 0.2 }}>
           心理健康的 InBody <span style={{ fontFamily: 'Inter', fontWeight: 500 }}>·</span> 測驗結果
         </div>
       </div>
@@ -493,6 +568,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
       {/* Hero: blue bagel card + radar chart */}
       <section style={{ padding: '16px 14px 6px', display: 'flex', gap: 10, alignItems: 'stretch' }}>
         <div
+          data-share-bluecard
           style={{
             flex: '0 0 160px',
             background: '#5C95FF',
@@ -506,6 +582,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
           <div style={{ fontSize: 11, color: '#fff', fontWeight: 600, letterSpacing: 0.2, marginBottom: 2 }}>你的心理體型是…</div>
           <div style={{ position: 'relative', height: 90, margin: '2px -4px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <img
+              data-share-food-img
               src={food.img}
               alt={food.zh}
               style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,.15))' }}
@@ -515,6 +592,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
             ＃{food.zh}
           </div>
           <div
+            data-share-capsule
             style={{
               display: 'inline-block',
               padding: '2px 6px',
@@ -601,6 +679,7 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         <div style={{ display: 'flex', alignItems: 'stretch', borderRadius: 12, overflow: 'hidden', border: '1px solid #DCE6FA' }}>
           {/* Photo — filename: /assets/celeb-{name}.jpg, e.g. celeb-蔡康永.jpg */}
           <div
+            data-share-celeb-container
             style={{
               position: 'relative',
               width: 104,
