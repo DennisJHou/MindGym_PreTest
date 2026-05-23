@@ -32,6 +32,10 @@ app.add_middleware(
         "https://mind-gym-pre-test.vercel.app",
         "https://mindgym-pretest.vercel.app"
     ],
+    # Vercel preview deployments use unique URLs per commit, e.g.
+    # mind-gym-pre-test-<hash>-<user>-projects.vercel.app — allow any
+    # subdomain under our two project names.
+    allow_origin_regex=r"^https://(mind-gym-pre-test|mindgym-pretest)([\-a-z0-9]+)?\.vercel\.app$",
     allow_methods=["*"],
     allow_headers=["*"],
 )
