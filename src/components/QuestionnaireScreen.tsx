@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { DimensionKey, NarrativeAnswers } from '../types'
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
 import VoiceInput from './VoiceInput'
+import { HIDE_LOGO } from '../utils/branding'
 
 interface Props {
   initialAnswers: NarrativeAnswers
@@ -47,17 +48,20 @@ function ProgressHeader({ step }: { step: number }) {
           marginBottom: 18,
         }}
       >
-        <img
-          src="/assets/psy-by-psy-logo.png"
-          alt="PSY by PSY"
-          style={{ height: 84, width: 'auto', objectFit: 'contain' }}
-        />
+        {!HIDE_LOGO && (
+          <img
+            src="/assets/psy-by-psy-logo.png"
+            alt="PSY by PSY"
+            style={{ height: 84, width: 'auto', objectFit: 'contain' }}
+          />
+        )}
         <div
           style={{
-            position: 'absolute',
+            position: HIDE_LOGO ? 'static' : 'absolute',
             right: 0,
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: HIDE_LOGO ? undefined : '50%',
+            transform: HIDE_LOGO ? undefined : 'translateY(-50%)',
+            padding: HIDE_LOGO ? '10px 0' : undefined,
             fontSize: 11,
             fontFamily: 'Inter',
             color: '#959595',

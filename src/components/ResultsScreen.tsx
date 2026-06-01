@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { useRef, useState } from 'react'
 import type { InMindReport, DimensionKey } from '../types'
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
+import { HIDE_LOGO } from '../utils/branding'
 
 interface Props {
   report: InMindReport
@@ -540,9 +541,11 @@ export default function InMindReportPage({ report, onRestart }: Props) {
     <div className="screen-enter" style={{ paddingBottom: 48, background: '#fff' }}>
     <div ref={pageRef} style={{ background: '#fff' }}>
       {/* Top mini brand */}
-      <div style={{ textAlign: 'center', padding: '14px 0 0' }}>
-        <img src="/assets/psy-by-psy-logo.png" alt="PSY by PSY" style={{ height: 84, width: 'auto', objectFit: 'contain' }} />
-      </div>
+      {!HIDE_LOGO && (
+        <div style={{ textAlign: 'center', padding: '14px 0 0' }}>
+          <img src="/assets/psy-by-psy-logo.png" alt="PSY by PSY" style={{ height: 84, width: 'auto', objectFit: 'contain' }} />
+        </div>
+      )}
 
       {/* HUGE InMind hero */}
       <div style={{ padding: '2px 16px 0' }}>
@@ -854,6 +857,9 @@ export default function InMindReportPage({ report, onRestart }: Props) {
         <RoadmapRow when="第 1 個月" body={take_action.after_1_month} dot="#5C95FF" last />
       </section>
 
+      {/* ── 商業推廣區（學校版隱藏）───────────────────── */}
+      {!HIDE_LOGO && (
+      <>
       {/* ── 加入心理健身房 CTA ───────────────────────── */}
       <section style={{ padding: '4px 16px 8px' }}>
         <a
@@ -986,6 +992,8 @@ export default function InMindReportPage({ report, onRestart }: Props) {
 
         </div>
       </section>
+      </>
+      )}
 
       {/* ── 重新檢測（縮小版）───────────────────────── */}
       <div style={{ padding: '8px 20px 16px', textAlign: 'center' }}>

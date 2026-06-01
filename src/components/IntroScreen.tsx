@@ -1,4 +1,5 @@
 import { DIMENSION_CONFIGS, DIMENSION_ORDER } from '../types'
+import { HIDE_LOGO } from '../utils/branding'
 
 interface Props {
   onStart: () => void
@@ -20,13 +21,15 @@ export default function LandingPage({ onStart }: Props) {
       style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', background: '#fff' }}
     >
       {/* PSY by PSY top logo */}
-      <div style={{ padding: '20px 24px 6px', display: 'flex', justifyContent: 'center' }}>
-        <img
-          src="/assets/psy-by-psy-logo.png"
-          alt="PSY by PSY"
-          style={{ height: 64, width: 'auto', objectFit: 'contain' }}
-        />
-      </div>
+      {!HIDE_LOGO && (
+        <div style={{ padding: '20px 24px 6px', display: 'flex', justifyContent: 'center' }}>
+          <img
+            src="/assets/psy-by-psy-logo.png"
+            alt="PSY by PSY"
+            style={{ height: 64, width: 'auto', objectFit: 'contain' }}
+          />
+        </div>
+      )}
 
       {/* InMind wordmark + subtitle */}
       <div style={{ padding: '4px 24px 0', display: 'flex', alignItems: 'baseline', gap: 10 }}>
